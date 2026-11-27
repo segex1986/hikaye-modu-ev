@@ -1046,3 +1046,10 @@ html.er-karsitlik { --soluk: #263238; }
 html.er-karsitlik .ipucu, html.er-karsitlik small { color: #1a1a1a !important; }
 html.er-karsitlik .ince-btn, html.er-karsitlik .etkinlik, html.er-karsitlik .pencere, html.er-karsitlik .sosyal-secenek, html.er-karsitlik .sosyal-kart { border-color: #37474f !important; }
 html.er-hareket *, html.er-hareket *::before, html.er-hareket *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+
+/* iPad uygulaması: telefon kumandası, tarayıcıya kurma ve tam ekran düğmeleri yok (uygulama zaten tam ekran). */
+body.ipad-surumu #btn-kumanda, body.ipad-surumu #btn-kurulum, body.ipad-surumu #btn-tam-ekran, body.ipad-surumu [data-sinif-tam] { display: none !important; }
+/* iPad uygulamasında yazdırma: iOS yazdırma penceresi açıkken ekran raporun kendisine döner. */
+html.ios-yazdir, html.ios-yazdir body { height: auto !important; overflow: visible !important; background: #fff !important; }
+html.ios-yazdir body > *:not(#rapor) { display: none !important; }
+html.ios-yazdir #rapor { display: block; color: #1d2733; font-size: 10.5pt; line-height: 1.45; padding: 10mm 12mm; background: #fff; }

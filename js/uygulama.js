@@ -17,6 +17,8 @@ try { mod = localStorage.getItem('hikaye-modu-mod') || 'danisma'; cocukAlt = loc
 if (!['danisma', 'ebeveyn', 'cocuk'].includes(mod)) mod = 'danisma';
 // Ev sürümü (ebeveynlere verilen, sunucusuz kopya): yalnızca ebeveyn modu ve çocuğun serbest oyunu açılır.
 const EV_SURUMU = !!window.HIKAYE_EV;
+// iPad uygulaması: kayıtlar cihazın içinde (js/yerel-sunucu.js); telefon kumandası ve tarayıcıya kurma yok.
+const IPAD = !!window.HIKAYE_IPAD;
 if (EV_SURUMU) { if (mod !== 'cocuk') mod = 'ebeveyn'; cocukAlt = 'serbest'; }
 const cocukSerbest = () => mod === 'cocuk' && cocukAlt === 'serbest';
 // Ebeveyn ve serbest çocuk oyunlarının taslağı danışma oturumununkine karışmaz.
@@ -2201,11 +2203,11 @@ async function korumaAc() {
   if (!d) { $('#koruma-icerik').innerHTML = '<p class="bos-mesaj">Sunucuya ulaşılamadı.</p>'; return; }
   const alan = (id, yer) => `<input id="${id}" type="password" autocomplete="new-password" placeholder="${yer}">`;
   $('#koruma-icerik').innerHTML = d.aktif ? `
-    <p class="koruma-durum acik">🔒 Kayıtlar bu bilgisayarda parolayla şifreli tutuluyor.</p>
+    <p class="koruma-durum acik">🔒 Kayıtlar bu ${IPAD ? 'cihazda' : 'bilgisayarda'} parolayla şifreli tutuluyor.</p>
     <details><summary>Parolayı değiştir</summary><div class="koruma-form">${alan('k-eski', 'Şimdiki parola')}${alan('k-yeni', 'Yeni parola (en az 4 karakter)')}${alan('k-yeni2', 'Yeni parola (tekrar)')}<button class="ince-btn" data-koruma="degistir">Değiştir</button></div></details>
     <details><summary>Korumayı kaldır</summary><div class="koruma-form">${alan('k-kaldir', 'Parola')}<p class="ipucu">Kayıtlar yeniden şifresiz saklanır.</p><button class="ince-btn tehlike" data-koruma="kaldir">Korumayı kaldır</button></div></details>
     ${d.giris ? '<button class="ince-btn" data-koruma="cikis">🚪 Bu cihazda oturumu kapat</button>' : ''}` : `
-    <p class="koruma-durum">🔓 Kayıtlar şu an şifresiz. Aynı ağdaki cihazlar programdan kayıtlara ulaşabilir.</p>
+    <p class="koruma-durum">🔓 Kayıtlar şu an şifresiz.${IPAD ? ' iPad’i eline alan biri programdan kayıtları açabilir.' : ' Aynı ağdaki cihazlar programdan kayıtlara ulaşabilir.'}</p>
     <div class="koruma-form">${alan('k-yeni', 'Parola (en az 4 karakter)')}${alan('k-yeni2', 'Parola (tekrar)')}
       <p class="uyari">⚠️ Parolayı unutursanız kayıtlar <b>açılamaz</b>; kimse kurtaramaz. Parolayı güvenli bir yere not edin.</p>
       <button class="buyuk-btn kucuk" data-koruma="kur">🔒 Korumayı aç</button></div>`;
@@ -3654,7 +3656,7 @@ window.addEventListener('pagehide', () => { if (canli) navigator.sendBeacon?.(`a
 // ================= Tablete uygulama olarak kurma =================
 let kurulumIstegi = null;
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); kurulumIstegi = e; });
-if ('serviceWorker' in navigator && window.isSecureContext) navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && window.isSecureContext && !IPAD) navigator.serviceWorker.register('sw.js').catch(() => {});
 $('#btn-kurulum').addEventListener('click', () => {
   rehberKapat();
   const kurulu = matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches || navigator.standalone;
@@ -3687,6 +3689,7 @@ function modUygula() {
   b.classList.toggle('cocuk-serbest', cocukSerbest());
   b.classList.toggle('cocuk-oturum', mod === 'cocuk' && cocukAlt === 'oturum');
   b.classList.toggle('ev-surumu', EV_SURUMU);
+  b.classList.toggle('ipad-surumu', IPAD);
   const m = MODLAR[mod];
   $('#btn-mod').innerHTML = `${m.ikon} ${m.ad} <small>· modu değiştir</small>`;
   document.title = mod === 'ebeveyn' ? 'Hikaye Modu · Ebeveyn' : mod === 'cocuk' ? 'Hikaye Modu' : 'Hikaye Modu · Danışma';
