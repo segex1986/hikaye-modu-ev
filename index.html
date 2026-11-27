@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#5bb8ff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Hikaye Modu · Evde Oyun</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📖%3C/text%3E%3C/svg%3E">
+<script>window.HIKAYE_EV = true;</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="ikonlar/ikon-192.png">
+<link rel="stylesheet" href="stil.css">
+</head>
+<body>
+
+<section id="ekran-giris" class="ekran aktif">
+  <div class="giris-arka">☁️ ☀️ 🌳 🐶 🏖️ 🧸</div>
+  <div class="giris-kart">
+    <div class="giris-ikon">📖</div>
+    <p class="ust-yazi sadece-danisma">Çocuk Görüşmelerinde</p>
+    <h1>Hikaye Modu</h1>
+    <p class="aciklama sadece-danisma">Birlikte bir yer seçelim, karakterlerimizi alalım<br>ve hikayemizi kuralım.</p>
+    <p class="aciklama sadece-ebeveyn"><b>Özel Oyun Zamanı</b><br>Bugün oyunu çocuğunuz yönetsin; siz eşlik edin.</p>
+    <p class="aciklama sadece-cocuk">Bir yer seç, karakterlerini al,<br>istediğin hikayeyi kur!</p>
+    <button id="btn-basla" class="buyuk-btn">Hikayeye Başla ▶</button>
+    <button id="btn-devam" class="ince-btn gizli">↩︎ Kaldığımız yerden devam et</button>
+    <div class="cocuk-kutular sadece-cocuk">
+      <button data-cocuk-kutu="ciz"><span>🖍️</span>Karakter çiz</button>
+      <button data-cocuk-kutu="sakin"><span>🎈</span>Balon nefesi</button>
+      <button data-cocuk-kutu="endise"><span>👾</span>Endişe canavarı</button>
+      <button data-cocuk-kutu="galeri" class="sadece-serbest"><span>🖼️</span>Benim hikayelerim</button>
+    </div>
+    <div class="giris-alt sadece-ebeveyn">
+      <button id="btn-e-nasil" class="ince-btn">📖 Nasıl oynanır?</button>
+      <button id="btn-e-gunluk" class="ince-btn">📔 Oyun günlüğüm</button>
+    </div>
+    <button id="btn-kayitlar-giris" class="ince-btn sadece-danisma">📂 Kayıtlı hikayeler</button>
+    <button id="btn-mod" class="mod-dugmesi cocuk-degil"></button>
+  </div>
+</section>
+
+<section id="ekran-ortam" class="ekran">
+  <header class="ust-baslik">
+    <button class="yuvarlak-btn" data-git="giris" aria-label="Geri">◀</button>
+    <h2><span class="adim">1</span> Hikayemiz nerede geçsin?</h2>
+    <button id="btn-senaryolar" class="buyuk-btn kucuk sadece-danisma" title="Okulun ilk günü, yeni kardeş, iki ev, hastane, yas…">📚 Hazır senaryolar</button>
+  </header>
+  <div id="ortam-listesi" class="ortam-izgara"></div>
+</section>
+
+<section id="ekran-karakter" class="ekran">
+  <header class="ust-baslik">
+    <button class="yuvarlak-btn" data-git="ortam" aria-label="Geri">◀</button>
+    <h2><span class="adim">2</span> Hikayemizde kimler olsun?</h2>
+    <button id="btn-sahneye" class="buyuk-btn kucuk">Hikayeye geç <span id="secim-sayaci" class="sayac">0</span> ▶</button>
+  </header>
+  <nav id="kategori-sekmeleri" class="sekmeler"></nav>
+  <div id="karakter-listesi" class="karakter-izgara"></div>
+</section>
+
+<section id="ekran-sahne" class="ekran">
+  <div id="sahne">
+    <div id="gok"></div>
+    <canvas id="hava-tuval"></canvas>
+    <div id="manzara"></div>
+    <canvas id="kum-tuval" class="gizli"></canvas>
+    <div id="hava-ortu"></div>
+    <svg id="alan-katmani" viewBox="0 0 1000 1000" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="alan-etiketleri"></div>
+    <svg id="bag-katmani" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="karakter-katmani"></div>
+    <div id="perde" class="gizli" aria-hidden="true"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="perde-kumas" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b71c1c"/><stop offset=".5" stop-color="#e53935"/><stop offset="1" stop-color="#b71c1c"/></linearGradient>
+        <pattern id="perde-kivrim" width="78" height="900" patternUnits="userSpaceOnUse"><rect width="78" height="900" fill="url(#perde-kumas)"/></pattern></defs>
+      <g class="perde-sol"><rect x="330" y="150" width="472" height="560" fill="url(#perde-kivrim)"/><path d="M802 150 V710" stroke="#ffca28" stroke-width="6"/></g>
+      <g class="perde-sag"><rect x="798" y="150" width="472" height="560" fill="url(#perde-kivrim)"/><path d="M798 150 V710" stroke="#ffca28" stroke-width="6"/></g>
+      <path d="M318 140 H1282 V200 q-40 30 -80 0 q-40 30 -80 0 q-40 30 -80 0 q-40 30 -80 0 q-40 30 -80 0 q-40 30 -80 0 q-40 30 -80 0 q-40 30 -80 0 q-40 30 -80 0 q-40 30 -80 0 q-40 30 -80 0 q-42 30 -84 0z" fill="#8e1b1b" stroke="#ffca28" stroke-width="4"/>
+    </svg></div>
+    <div id="alkis-katmani" aria-hidden="true"></div>
+    <div id="karanlik"></div>
+    <div id="kum-ortusu" class="gizli"></div>
+    <div id="cizim-ortusu" class="gizli"><div class="cizim-ipucu">🛡️ Parmağınla güvenli yerin çevresini çiz <button id="btn-cizim-vazgec">✖ Vazgeç</button></div></div>
+  </div>
+
+  <header class="sahne-ust">
+    <button id="btn-sahne-geri" class="yuvarlak-btn" title="Ortamı değiştir">◀</button>
+    <div id="sahne-adi" class="sahne-etiket"></div>
+    <div class="sag-grup">
+      <button id="btn-geri-al" class="yuvarlak-btn" title="Geri al (Ctrl+Z)" disabled>↶</button>
+      <button id="btn-yinele" class="yuvarlak-btn" title="Yinele (Ctrl+Y)" disabled>↷</button>
+      <button id="btn-hava" class="yuvarlak-btn" title="Hava durumunu değiştir">☀️</button>
+      <button id="btn-isim" class="yuvarlak-btn cocuk-degil" title="İsimleri göster / gizle">🏷️</button>
+      <button id="btn-ses" class="yuvarlak-btn" title="Ses: normal / kısık / kapalı">🔊</button>
+      <button id="btn-karakter-ekle" class="yuvarlak-btn" title="Karakter ekle">➕</button>
+      <button id="btn-guvenli" class="yuvarlak-btn" title="Güvenli yer çiz">🛡️</button>
+      <button id="btn-isik" class="yuvarlak-btn" title="Işığı kapat (el feneri)">💡</button>
+      <button id="btn-an" class="yuvarlak-btn" title="Bu anın fotoğrafını hikaye şeridine ekle">📸</button>
+      <button id="btn-rehber" class="yuvarlak-btn cocuk-degil" title="Rehber paneli">📋</button>
+      <button id="btn-tam-ekran" class="yuvarlak-btn cocuk-degil" title="Tam ekran">⛶</button>
+    </div>
+  </header>
+
+  <div id="duygu-paneli" class="gizli">
+    <div class="duygu-baslik"><span id="duygu-kim"></span> <span id="duygu-soru">nasıl hissediyor?</span></div>
+    <div id="duygu-dugmeleri" class="duygu-dugmeleri"></div>
+    <div id="siddet-satiri" class="siddet-satiri gizli"><span>Ne kadar?</span><div id="siddet-dugmeleri"></div></div>
+    <div class="arac-dugmeleri">
+      <button data-arac="kucult" title="Küçült">➖</button>
+      <label class="boyut-kaydirici" title="Boyut (iki parmakla da büyütüp küçültebilirsiniz)">📏<input id="boyut" type="range" min="35" max="350" step="5"><span id="boyut-yazi">100%</span></label>
+      <button data-arac="buyut" title="Büyüt">➕</button>
+      <button data-arac="konus" title="Karakter ne söylüyor ya da ne düşünüyor?">💬 Konuştur</button>
+      <button data-arac="gorunum" title="Ten, saç, kıyafet, gözlük…">🎨 Görünüm</button>
+      <button data-arac="bag" title="Başka bir karakterle arasındaki ilişkiyi çiz">🔗 Bağ kur</button>
+      <button data-arac="guc" title="Kalkan, görünmezlik, uçma…">✨ Güç</button>
+      <button data-arac="cevir" title="Yönünü çevir">↔️ Çevir</button>
+      <button data-arac="isim" title="İsim ver">✏️ İsim ver</button>
+      <button data-arac="kaldir" title="Raftan geri koy">↩️ Rafa koy</button>
+      <button data-arac="kapat" title="Kapat">✖</button>
+    </div>
+  </div>
+
+  <div id="raf">
+    <div class="raf-ipucu">Karakterleri parmağınla yukarı sürükle ☝️</div>
+    <div id="raf-ogeler" class="raf-ogeler"></div>
+  </div>
+
+  <aside id="rehber-paneli" aria-hidden="true">
+    <div class="panel-ust"><h3>📋 Rehber Paneli</h3><button id="btn-rehber-kapat" class="yuvarlak-btn kucuk">✖</button></div>
+    <div class="panel-icerik">
+      <label class="alan">Danışan kodu
+        <input id="danisan-kod" type="text" maxlength="40" placeholder="ör. Ö-12 (gerçek ad yazmayın)">
+      </label>
+      <label class="alan">🌐 Çocuğun dili <small>(sorular ve duygular bu dilde de görünür)</small>
+        <select id="dil-secimi"></select>
+      </label>
+
+      <details open><summary>🧰 Çocukla etkinlikler</summary>
+        <div class="etkinlikler">
+          <button id="btn-dilek" class="etkinlik"><span>🪄</span>Dilek sahnesi<small>Şimdi ve keşke</small></button>
+          <button id="btn-beden" class="etkinlik"><span>🧍</span>Beden haritası<small>Duygu nerede?</small></button>
+          <button id="btn-endise" class="etkinlik"><span>📦</span>Endişe kutusu<small>Canavara yedir</small></button>
+          <button id="btn-sakin" class="etkinlik"><span>🎈</span>Sakinleşme<small>Balon nefesi</small></button>
+          <button id="btn-kokler" class="etkinlik"><span>🌱</span>Hikaye kökleri<small>Sonra ne oldu?</small></button>
+          <button id="btn-guvenli-yer" class="etkinlik"><span>🏡</span>Güvenli yerim<small>Kur, sakla, aç</small></button>
+          <button id="btn-rol" class="etkinlik"><span>🪑</span>Rol değiştirme<small>Şimdi sen o ol</small></button>
+          <button id="btn-kapanis" class="etkinlik"><span>🌙</span>Kapanış<small>Oyuncakları uyut</small></button>
+        </div>
+        <label class="secenek"><input id="sesli-oku" type="checkbox"> 🔊 Soruları ve yönergeleri sesli oku <small>(tabletin kendi sesiyle)</small></label>
+      </details>
+
+      <details><summary>🧑‍💼 Danışman araçları</summary>
+        <div class="alan">⏱️ Oturum süresi
+          <div class="ichava-satir"><select id="sure-hedef"><option value="">Kapalı</option><option>30</option><option>35</option><option>40</option><option>45</option><option>50</option><option>60</option></select>
+            <span>dakika</span><b id="sure-kalan"></b></div>
+          <small class="ipucu">Bitişe 5 dakika kala 📋 düğmesi turuncu yanıp söner; çocuğu ürkütmeden haber verir.</small></div>
+        <div class="etkinlikler">
+          <button id="btn-genogram" class="etkinlik"><span>🌳</span>Aile ağacı<small>Genogram</small></button>
+          <button id="btn-veli" class="etkinlik"><span>👪</span>Veli / öğretmen<small>Paylaşılabilir özet</small></button>
+          <button id="btn-kumanda" class="etkinlik"><span>📱</span>Telefondan yönet<small>Not, soru, tema</small></button>
+          <button id="btn-kurulum" class="etkinlik"><span>📲</span>Tablete kur<small>Ana ekran simgesi</small></button>
+        </div>
+        <button id="btn-kisayollar" class="ince-btn" style="margin-top:8px">⌨️ Klavye kısayolları</button>
+      </details>
+
+      <details><summary>🌤️ İç hava durumu</summary>
+        <div class="ichava-satir"><b>Başta:</b> <span id="ichava-bas">—</span><button class="ince-btn" data-ichava-sor="bas">Çocuğa sor</button></div>
+        <div class="ichava-satir"><b>Sonda:</b> <span id="ichava-son">—</span><button class="ince-btn" data-ichava-sor="son">Çocuğa sor</button></div>
+      </details>
+
+      <details><summary>🏷️ Temalar</summary>
+        <p class="ipucu">Oturumda öne çıkan temaları işaretleyin; izlemde oturumlar arası sayılır. Şeritteki anlara da tema verilebilir.</p>
+        <div id="tema-cipleri" class="tema-cipleri"></div>
+      </details>
+
+      <details open><summary>💬 Soru kartları</summary><div id="soru-kartlari"></div></details>
+
+      <details><summary>🌱 Oyun terapisi hatırlatmaları</summary>
+        <ul class="ilkeler">
+          <li><b>İzle ve anlat:</b> “Köpeği ağacın yanına koydun.” Yorum yapmadan çocuğun oyununu sözle takip edin.</li>
+          <li><b>Duyguyu yansıt:</b> “Ayı şu an çok kızgın görünüyor.” Duyguyu karaktere bağlayarak adlandırın.</li>
+          <li><b>Liderliği çocuğa bırak:</b> “Burada sen karar verebilirsin.” Hikayeyi yönlendirmeyin.</li>
+          <li><b>Metafor içinde kal:</b> Karakter üzerinden konuşun; doğrudan “Sen de mi böyle hissediyorsun?” demekten kaçının.</li>
+          <li><b>Sınır gerekirse ACT:</b> Duyguyu kabul et → sınırı söyle → seçenek sun.</li>
+          <li><b>Çabayı fark et:</b> “Bunu kurmak için çok uğraştın.” Sonucu değil süreci övün.</li>
+          <li><b>Tekrarları not edin:</b> Aynı tema, karakter veya duygu tekrar ediyorsa akışa bakın.</li>
+        </ul>
+      </details>
+
+      <details open><summary>📸 Hikaye şeridi <span id="serit-sayac" class="sayac kucuk">0</span></summary>
+        <p class="ipucu">Üstteki 📸 ile hikayenin önemli anlarını kaydedin. Başını, ortasını ve sonunu işaretleyip kısa bir not ekleyebilirsiniz.</p>
+        <div id="serit" class="serit"></div>
+      </details>
+
+      <details open><summary>🧭 Oyun akışı <span id="akis-sayac" class="sayac kucuk">0</span></summary>
+        <ol id="akis-listesi" class="akis"></ol>
+      </details>
+
+      <details open><summary>🎯 Oturum hedefi</summary>
+        <textarea id="oturum-hedefi" rows="2" placeholder="ör. Okula başlamayla ilgili duyguları ifade etmesine alan açmak"></textarea>
+        <div class="ichava-satir"><span>Sonuç:</span><select id="hedef-durumu"><option value="">—</option><option value="ulasildi">Ulaşıldı</option><option value="kismen">Kısmen ulaşıldı</option><option value="ulasilamadi">Ulaşılamadı</option></select></div>
+      </details>
+
+      <details><summary>⚠️ Risk ve koruma işaretleri</summary>
+        <div id="risk-listesi" class="risk-listesi"></div>
+        <textarea id="risk-not" rows="2" placeholder="Gözlenen/söylenen (olduğu gibi, yorumsuz) ve yapılan işlem"></textarea>
+        <p id="risk-uyari" class="uyari gizli">Okulunuzun çocuk koruma prosedürünü ve yasal bildirim yükümlülüğünü uygulayın; okul yönetimi ve rehberlik servisi koordinatörüyle hemen görüşün. Çocuğa sır tutma sözü vermeyin.</p>
+      </details>
+
+      <div class="alan">Gözlem notları
+        <div class="not-sablonlari"><span>Şablon:</span><button class="ince-btn" data-sablon="dap">DAP</button><button class="ince-btn" data-sablon="soap">SOAP</button><button class="ince-btn" data-sablon="oyun">Oyun gözlemi</button></div>
+        <textarea id="notlar" rows="5" placeholder="Temalar, tekrar eden duygular, çocuğun söyledikleri…"></textarea>
+      </div>
+
+      <div class="panel-dugmeler">
+        <button id="btn-kaydet" class="buyuk-btn kucuk">💾 Kaydet</button>
+        <button id="btn-oynat" class="ince-btn">▶ Hikayeyi oynat</button>
+        <button id="btn-rapor" class="ince-btn">🖨️ Oturum raporu</button>
+        <button id="btn-kitap" class="ince-btn">📖 Hikaye kitabı</button>
+        <button id="btn-kayitlar" class="ince-btn">📂 Kayıtlar</button>
+        <button id="btn-temizle" class="ince-btn tehlike">🧹 Sahneyi temizle</button>
+        <button id="btn-yeni" class="ince-btn">🆕 Yeni hikaye</button>
+      </div>
+    </div>
+  </aside>
+
+  <aside id="ebeveyn-paneli" aria-hidden="true">
+    <div class="panel-ust"><h3>👨‍👩‍👧 Ebeveyn paneli</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="panel-icerik">
+      <div class="alan">⏱️ Özel oyun zamanı
+        <div class="ichava-satir"><select id="e-sure"><option value="">Süre seçin</option><option value="10">10 dakika</option><option value="15">15 dakika</option><option value="20">20 dakika</option></select><b id="sure-kalan-e"></b></div>
+        <small class="ipucu">Bitime 2 dakika kala 📋 düğmesi turuncu yanıp söner.</small></div>
+
+      <div class="e-ipucu-kart"><p id="e-ipucu"></p><button class="ince-btn" data-e="ipucu">Sonraki ipucu ›</button></div>
+
+      <details open><summary>✅ Bugün kaç kez yaptım?</summary>
+        <p class="ipucu">Her yaptığınızda ilgili düğmeye dokunun. Amaç sayı değil, fark etmek.</p>
+        <div id="e-beceriler" class="beceriler"></div>
+        <p class="ipucu"><b>Kaçının:</b></p><ul id="e-kacin" class="kacin"></ul>
+      </details>
+
+      <details><summary>💛 Duygu sözlüğü</summary><ul id="e-duygular" class="e-liste"></ul></details>
+      <details><summary>🧯 Zor anlarda</summary><div id="e-zor" class="e-zor"></div></details>
+
+      <details open><summary>🧰 Birlikte</summary>
+        <div class="etkinlikler">
+          <button class="etkinlik" data-e="ichava"><span>🌤️</span>İçindeki hava<small>Bugün nasılsın?</small></button>
+          <button class="etkinlik" data-e="sakin"><span>🎈</span>Balon nefesi<small>Sakinleşme</small></button>
+          <button class="etkinlik" data-e="endise"><span>👾</span>Endişe canavarı<small>Endişeyi yedir</small></button>
+          <button class="etkinlik" data-e="bitir"><span>🏁</span>Oyunu bitir<small>Oyuncakları uyut</small></button>
+        </div>
+      </details>
+      <p class="ipucu">Bu modda hiçbir şey sunucuya kaydedilmez. Oyun günlüğü yalnızca bu cihazda tutulur.</p>
+    </div>
+  </aside>
+
+  <div id="kum-araclari" class="gizli" aria-label="Kum araçları">
+    <button data-kum="su" title="Su / dere / göl">💧<span>Su</span></button>
+    <button data-kum="tepe" title="Tepe / kum yığını">⛰️<span>Tepe</span></button>
+    <button data-kum="cukur" title="Çukur kaz">🕳️<span>Çukur</span></button>
+    <button data-kum="duzle" title="Kumu düzle (sil)">🧹<span>Düzle</span></button>
+  </div>
+  <div id="dilek-cubugu"><span id="dilek-yazi">🪄 Nasıl olmasını isterdin?</span><small>Karakterleri taşı, duyguları ve bağları değiştir</small>
+    <button id="btn-dilek-bitti" class="buyuk-btn kucuk">✔ Bitti</button><button id="btn-dilek-vazgec" class="ince-btn">✖ Vazgeç</button></div>
+  <div id="tiyatro-araclari" class="gizli" aria-label="Tiyatro">
+    <button data-tiyatro="perde">🎭<span>Perdeyi kapat</span></button>
+    <button data-tiyatro="alkis">👏<span>Alkış</span></button>
+    <button data-tiyatro="selam">🙇<span>Selam</span></button>
+    <button data-tiyatro="oynat" class="seyirci-ozel">▶<span>Oynat</span></button>
+    <button data-tiyatro="seyirci">🍿<span class="seyirci-yazi">Seyirci ol</span><span class="sahne-yazi">Sahneye dön</span></button>
+  </div>
+  <div id="kok-cubugu"><div class="kok-govde"><p id="kok-yazi"></p><p id="kok-soru" class="kok-soru"></p></div>
+    <div class="kok-dugmeler"><button id="btn-kok-oku" class="ince-btn" title="Sesli oku">🔊</button><button id="btn-kok-tamam" class="buyuk-btn kucuk">✔ Tamamladı</button><button id="btn-kok-kapat" class="ince-btn">✖</button></div></div>
+  <div id="rol-cubugu"><span id="rol-yazi"></span>
+    <span class="rol-giris"><input id="rol-metin" maxlength="160" autocomplete="off"><button id="btn-rol-soyle" class="ince-btn">💬 Ekle</button></span>
+    <button id="btn-rol-degistir" class="buyuk-btn kucuk">🔄 Taraf değiştir</button><button id="btn-rol-bitir" class="ince-btn">✔ Bitir</button></div>
+  <div id="kapanis" class="gizli"><div class="kapanis-icerik"><div class="kapanis-ay">🌙</div><p id="kapanis-yazi"></p><button class="buyuk-btn kucuk" data-kapanis-bitti>✔ Bitti</button></div></div>
+  <div id="bag-ipucu"><span id="bag-ipucu-yazi">🔗 Bağlamak istediğin karaktere dokun</span><button id="btn-bag-vazgec">✖ Vazgeç</button></div>
+  <div id="oynat-cubugu" class="gizli">
+    <div class="oynat-ust"><b>▶ Hikayemiz</b><span id="oynat-yazi"></span><button id="btn-oynat-dur" class="ince-btn">⏹ Durdur</button></div>
+    <div class="oynat-ray"><div id="oynat-ilerleme"></div></div>
+  </div>
+
+  <div id="bildirim" role="status"></div>
+  <div id="flas"></div>
+</section>
+
+<div id="konusma-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3 id="konusma-baslik">💬 Ne söylüyor?</h3><button class="yuvarlak-btn kucuk" data-konus="kapat">✖</button></div>
+    <div class="pencere-icerik">
+      <div class="secim-grup" id="konusma-tur">
+        <button data-tur="soyle" class="secim">💬 Söylüyor</button>
+        <button data-tur="dusun" class="secim">💭 Düşünüyor</button>
+      </div>
+      <textarea id="konusma-metin" rows="3" maxlength="160" placeholder="Çocuğun karakter için söylediğini yazın…"></textarea>
+      <div id="ses-efektleri" class="secim-grup gizli"></div>
+      <div class="ses-satiri">
+        <button id="btn-kayit-ses" class="ince-btn">🎙️ Sesini kaydet</button>
+        <button id="btn-dinle" class="ince-btn gizli">▶ Dinle</button>
+        <button id="btn-ses-sil" class="ince-btn tehlike gizli">🗑 Sesi sil</button>
+        <span id="ses-durum" class="ses-durum"></span>
+      </div>
+      <div class="pencere-dugmeler">
+        <button class="ince-btn tehlike" data-konus="kaldir">Balonu kaldır</button>
+        <button class="buyuk-btn kucuk" data-konus="tamam">✔ Tamam</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="gorunum-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3 id="gorunum-baslik">🎨 Görünüm</h3><button class="yuvarlak-btn kucuk" data-gorunum="kapat">✖</button></div>
+    <div class="gorunum-govde">
+      <div id="gorunum-onizleme" class="gorunum-onizleme"></div>
+      <div id="gorunum-secenekler" class="gorunum-secenekler"></div>
+    </div>
+    <div class="pencere-dugmeler">
+      <button class="ince-btn" data-gorunum="sifirla">↺ İlk hâline dön</button>
+      <button class="buyuk-btn kucuk" data-gorunum="tamam">✔ Tamam</button>
+    </div>
+  </div>
+</div>
+
+<div id="dolap-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis dolap">
+    <div class="panel-ust"><h3 id="dolap-baslik">✚ Malzeme Dolabı</h3><button class="yuvarlak-btn kucuk" data-dolap="kapat">✖</button></div>
+    <p class="ipucu" style="padding:0 18px">Bir malzemeye dokun: dolabın önüne, sahneye gelir. İstediğin kadar seçebilirsin.</p>
+    <div id="dolap-raflari" class="dolap-raflari"></div>
+    <div class="pencere-dugmeler"><span></span><button class="buyuk-btn kucuk" data-dolap="kapat">✔ Tamam</button></div>
+  </div>
+</div>
+
+<div id="cizim-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3>🖍️ Kendi karakterini çiz</h3><button class="yuvarlak-btn kucuk" data-ciz="kapat">✖</button></div>
+    <div class="ciz-govde">
+      <canvas id="ciz-tuval" width="600" height="600"></canvas>
+      <div class="ciz-araclar">
+        <div id="ciz-renkler" class="ciz-renkler"></div>
+        <div class="ciz-kalinliklar"><button data-kalin="6" title="İnce"><i style="width:6px;height:6px"></i></button><button data-kalin="14" title="Orta"><i style="width:14px;height:14px"></i></button><button data-kalin="28" title="Kalın"><i style="width:26px;height:26px"></i></button></div>
+        <div class="ciz-islemler"><button class="ince-btn" data-ciz="silgi">🧽 Silgi</button><button class="ince-btn" data-ciz="geri">↶ Geri al</button><button class="ince-btn tehlike" data-ciz="temizle">🗑 Temizle</button></div>
+        <label class="alan">Adı ne?<input id="ciz-ad" maxlength="24" placeholder="ör. Uykucu Canavar"></label>
+        <p class="ipucu">Çocuk istediği gibi çizsin. Boş kalan yerler saydam olur, karakter sahnede ortama karışır.</p>
+      </div>
+    </div>
+    <div class="pencere-dugmeler"><span></span><button class="buyuk-btn kucuk" data-ciz="kaydet">✔ Karakteri ekle</button></div>
+  </div>
+</div>
+
+<div id="bag-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3 id="bag-baslik">🔗 Bağ</h3><button class="yuvarlak-btn kucuk" data-bag-kapat>✖</button></div>
+    <div class="pencere-icerik">
+      <p class="ipucu">Bu iki karakter arasında nasıl bir bağ var? Çocuğa sorun, o seçsin.</p>
+      <div id="bag-turleri" class="bag-turleri"></div>
+      <div class="pencere-dugmeler"><button id="btn-bag-sil" class="ince-btn tehlike">Bağı sil</button><button class="ince-btn" data-bag-kapat>Vazgeç</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="izlem-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3 id="izlem-baslik">📈 İzlem</h3><button class="yuvarlak-btn kucuk" data-izlem="kapat">✖</button></div>
+    <div id="izlem-icerik" class="pencere-icerik izlem"></div>
+    <div class="pencere-dugmeler"><span class="ipucu">Aynı danışan koduyla kaydedilen bütün oturumlar.</span><button class="ince-btn" data-izlem="yazdir">🖨️ Yazdır / PDF</button></div>
+  </div>
+</div>
+
+<div id="rapor" aria-hidden="true"></div>
+
+<div id="kayit-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3>📂 Kayıtlı hikayeler</h3><button id="btn-kayit-kapat" class="yuvarlak-btn kucuk">✖</button></div>
+    <div id="kayit-listesi" class="kayit-listesi"></div>
+    <div class="kayit-alt">
+      <button id="btn-koruma" class="ince-btn">🔒 Parola koruması</button>
+      <button id="btn-yedek-al" class="ince-btn">💾 Yedek al</button>
+      <label class="ince-btn">📥 Yedekten yükle<input id="yedek-dosya" type="file" accept=".zip,application/zip" hidden></label>
+    </div>
+  </div>
+</div>
+
+<div id="parola-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3>🔒 Kayıtlar parolalı</h3><button class="yuvarlak-btn kucuk" data-parola="vazgec">✖</button></div>
+    <div class="pencere-icerik">
+      <input id="parola-giris" type="password" autocomplete="current-password" placeholder="Parola">
+      <p id="parola-hata" class="hata-yazi"></p>
+      <div class="pencere-dugmeler"><button class="ince-btn" data-parola="vazgec">Vazgeç</button><button class="buyuk-btn kucuk" data-parola="tamam">Aç</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="koruma-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3>🔒 Parola koruması</h3><button class="yuvarlak-btn kucuk" data-koruma="kapat">✖</button></div>
+    <div class="pencere-icerik"><div id="koruma-icerik"></div><p id="koruma-hata" class="hata-yazi"></p>
+      <p class="ipucu">Parola açıkken kayıtlar bu bilgisayarın diskinde şifreli tutulur; programı açan her cihaz parola sorar. Tarayıcıdaki taslak (kaldığınız yer) şifrelenmez; oturum sonunda 🆕 Yeni hikaye ile temizleyin.</p></div>
+  </div>
+</div>
+
+<div id="senaryo-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3>📚 Hazır senaryolar</h3><button class="yuvarlak-btn kucuk" data-senaryo-kapat>✖</button></div>
+    <p class="ipucu" style="padding:0 18px">Senaryo ortamı, karakterleri ve o konuya uygun soru kartlarını hazırlar. Hikayeyi yine çocuk kurar.</p>
+    <div id="senaryo-listesi" class="senaryo-listesi"></div>
+  </div>
+</div>
+
+<div id="ichava-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis cocuk-penceresi">
+    <div class="panel-ust"><h3 id="ichava-soru">Bugün içinde hava nasıl?</h3><button class="yuvarlak-btn kucuk" data-ichava-kapat>✖</button></div>
+    <div id="ichava-kartlari" class="ichava-kartlari"></div>
+  </div>
+</div>
+
+<div id="beden-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3 id="beden-soru">Bu duyguyu bedeninin neresinde hissediyorsun?</h3><button class="yuvarlak-btn kucuk" data-beden="kapat">✖</button></div>
+    <div class="beden-govde">
+      <div class="beden-tahta"><img id="beden-arka" alt=""><canvas id="beden-tuval" width="300" height="500"></canvas><img id="beden-cizgi" alt=""></div>
+      <div class="beden-araclar"><div id="beden-duygular" class="beden-duygular"></div>
+        <div class="ciz-islemler"><button class="ince-btn" data-beden="silgi">🧽 Silgi</button><button class="ince-btn" data-beden="geri">↶ Geri al</button></div></div>
+    </div>
+    <div class="pencere-dugmeler"><span class="ipucu">Bir duygu seçip bedenin o bölgesini boyayın; birden çok duygu kullanılabilir.</span><button class="buyuk-btn kucuk" data-beden="kaydet">✔ Kaydet</button></div>
+  </div>
+</div>
+
+<div id="endise-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis cocuk-penceresi">
+    <div class="panel-ust"><h3 id="endise-soru">Seni üzen ya da endişelendiren ne?</h3><button class="yuvarlak-btn kucuk" data-endise="kapat">✖</button></div>
+    <div class="endise-sahne">
+      <div class="endise-canavar"><svg viewBox="0 0 200 200"><ellipse cx="100" cy="120" rx="80" ry="70" fill="#9575cd"/><circle cx="70" cy="80" r="22" fill="#fff"/><circle cx="130" cy="80" r="22" fill="#fff"/><circle cx="74" cy="84" r="9" fill="#311b92"/><circle cx="126" cy="84" r="9" fill="#311b92"/>
+        <path d="M40 60 l-12 -34 l30 22z M160 60 l12 -34 l-30 22z" fill="#7e57c2"/><g class="agiz"><ellipse cx="100" cy="140" rx="44" ry="26" fill="#4a148c"/><path d="M70 126 l8 12 l8 -12 l8 12 l8 -12 l8 12 l8 -12 l8 12" fill="#fff"/></g></svg></div>
+      <div class="endise-kutu"><svg viewBox="0 0 200 200"><rect x="30" y="80" width="140" height="100" rx="10" fill="#ffb74d"/><rect class="kapak" x="24" y="62" width="152" height="28" rx="8" fill="#ff9800"/>
+        <g class="kilit"><rect x="84" y="112" width="32" height="28" rx="5" fill="#5d4037"/><path d="M90 112 v-10 a10 10 0 0 1 20 0 v10" stroke="#5d4037" stroke-width="6" fill="none"/></g></svg></div>
+    </div>
+    <div class="pencere-icerik"><textarea id="endise-metin" rows="2" maxlength="200" placeholder="Çocuğun endişesini yazın (ya da çocuk kendisi yazsın)…"></textarea>
+      <div class="pencere-dugmeler"><span id="endise-sayac" class="ipucu"></span><span><button class="buyuk-btn kucuk mor" data-endise="canavar">👾 Canavara yedir</button> <button class="buyuk-btn kucuk" data-endise="kutu">🔒 Kutuya kilitle</button></span></div></div>
+  </div>
+</div>
+
+<div id="sakin-penceresi" class="pencere-arka gizli">
+  <div class="sakin-kose">
+    <h2 id="sakin-baslik">Balonu birlikte şişirelim</h2>
+    <div class="sakin-alan"><svg id="sakin-balon" viewBox="0 0 120 170"><path d="M60 8 C20 8 8 44 8 70 C8 108 40 132 60 136 C80 132 112 108 112 70 C112 44 100 8 60 8Z" fill="#f48fb1"/><ellipse cx="40" cy="44" rx="12" ry="20" fill="#fff" opacity=".45"/><path d="M54 136 h12 l-6 10z" fill="#ec407a"/><path d="M60 146 q-10 10 0 20" stroke="#90a4ae" stroke-width="2" fill="none"/></svg></div>
+    <p id="sakin-yazi" class="sakin-yazi">Nefes al</p>
+    <p id="sakin-sayac" class="sakin-sayac"></p>
+    <button class="buyuk-btn kucuk" data-sakin="kapat">✔ Bitti</button>
+  </div>
+</div>
+
+<div id="kok-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3>🌱 Hikaye kökleri</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <p class="ipucu" style="padding:0 18px">Hikayenin başını siz okuyun, sonra “Sonra ne oldu? Bana göster.” deyin. Çocuk sahnede tamamlasın; araya girmeden izleyin.</p>
+    <div id="kok-listesi" class="senaryo-listesi"></div>
+  </div>
+</div>
+
+<div id="guvenli-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3>🏡 Güvenli yerim</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div id="guvenli-icerik" class="pencere-icerik"></div>
+  </div>
+</div>
+
+<div id="guc-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis cocuk-penceresi">
+    <div class="panel-ust"><h3 id="guc-soru">Hangi gücü olsun?</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div id="guc-kartlari" class="ichava-kartlari guc-kartlari"></div>
+    <div class="pencere-dugmeler"><span class="ipucu">Birden çok güç seçilebilir; tekrar dokunmak gücü kaldırır.</span><button class="buyuk-btn kucuk" data-kapat>✔ Tamam</button></div>
+  </div>
+</div>
+
+<div id="rol-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3>🪑 Rol değiştirme</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <p class="ipucu" style="padding:0 18px">Karşı karşıya oturacak iki karakter seçin. Çocuk önce birinin yerine geçip konuşur; “Taraf değiştir” ile diğerinin gözünden cevap verir.</p>
+    <div id="rol-karakterler" class="rol-karakterler"></div>
+    <div class="pencere-dugmeler"><span></span><button class="buyuk-btn kucuk" data-rol-basla disabled>▶ Başla</button></div>
+  </div>
+</div>
+
+<div id="genogram-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3>🌳 Aile ağacı</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="genogram-govde"><div id="genogram-cizim" class="genogram-cizim"></div>
+      <div><p class="ipucu">Sahnedeki insan karakterlerden çizilir; çocuğun kurduğu bağlar ilişki çizgisi olarak eklenir. Kuşağı ve cinsiyeti çocuğa sorarak düzeltin.</p>
+        <div id="genogram-ayarlar"></div></div></div>
+    <div class="pencere-dugmeler"><span class="ipucu">Büyükanne-büyükbabanın hangi taraftan olduğu bilinmediği için kesik çizgiyle bağlanır.</span><button class="buyuk-btn kucuk" data-genogram-ekle>📎 Rapora ekle</button></div>
+  </div>
+</div>
+
+<div id="veli-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3>👪 Veli / öğretmen özeti</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="pencere-icerik veli-form">
+      <p class="uyari">Bu sayfada çocuğun adı, danışan kodu, oyun içeriği ve söyledikleri yer almaz. Yalnızca paylaşılabilir genel gözlemleri yazın.</p>
+      <label class="alan">Kime<select id="veli-kime"><option value="veli">Veli</option><option value="ogretmen">Öğretmen</option></select></label>
+      <div class="alan">Bugün birlikte neler yaptık <button class="ince-btn" data-veli="yenile" style="float:right">↺ Yeniden öner</button><textarea id="veli-yapilan" rows="3"></textarea></div>
+      <label class="alan">Gözlemlenen güçlü yanlar <small>(her satır bir madde)</small><textarea id="veli-guclu" rows="3"></textarea></label>
+      <div id="veli-guclu-cipler" class="tema-cipleri"></div>
+      <label class="alan">Evde / sınıfta öneriler<textarea id="veli-oneri" rows="3"></textarea></label>
+      <div id="veli-oneri-cipler" class="tema-cipleri"></div>
+      <label class="alan">Sonraki görüşme <input id="veli-sonraki" maxlength="120" placeholder="ör. 2 hafta sonra, aynı gün"></label>
+    </div>
+    <div class="pencere-dugmeler"><span></span><button class="buyuk-btn kucuk" data-veli="yazdir">🖨️ Yazdır / PDF</button></div>
+  </div>
+</div>
+
+<div id="kumanda-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3>📱 Telefondan yönet</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div id="kumanda-icerik" class="pencere-icerik"></div>
+  </div>
+</div>
+
+<div id="kisayol-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3>⌨️ Klavye kısayolları</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="pencere-icerik"><table class="kisayol-tablo"><tbody id="kisayol-listesi"></tbody></table></div>
+  </div>
+</div>
+
+<div id="kurulum-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3>📲 Tablete uygulama gibi kur</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="pencere-icerik">
+      <p id="kurulum-durum" class="koruma-durum acik"></p>
+      <button id="kurulum-dogrudan" class="buyuk-btn kucuk gizli">📲 Şimdi kur</button>
+      <p><b>iPad (Safari):</b> Paylaş düğmesi <b>⬆️</b> → <b>Ana Ekrana Ekle</b>.</p>
+      <p><b>Android tablet (Chrome):</b> sağ üstteki <b>⋮</b> → <b>Ana ekrana ekle</b> ya da <b>Uygulamayı yükle</b>.</p>
+      <p><b>Bilgisayar (Chrome / Edge):</b> adres çubuğunun sağındaki <b>yükle</b> simgesi.</p>
+      <p class="ipucu">Simgeden açıldığında program adres çubuğu olmadan tam ekran açılır. Program yine bu bilgisayarda çalıştığı için Baslat.cmd açık olmalıdır.
+        Android'de tam kurulum için adresin https ile açılması gerekir; http adresinde simge yalnızca kısayol olarak eklenir.</p>
+    </div>
+  </div>
+</div>
+
+<button id="gizli-kose" aria-label="Yetişkin menüsü (basılı tutun)"></button>
+
+<div id="mod-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3>Programı kim, nasıl kullanacak?</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="mod-kartlari">
+      <button class="mod-kart" data-mod-sec="danisma"><span class="e">🧑‍⚕️</span><b>Psikolojik danışma</b>
+        <small>Danışmanın oturumu: rehber paneli, soru kartları, gözlem notları, kayıtlar, raporlar, izlem.</small></button>
+      <button class="mod-kart" data-mod-sec="ebeveyn"><span class="e">👨‍👩‍👧</span><b>Ebeveyn ile oyun</b>
+        <small>Evde “özel oyun zamanı”: ebeveyne ipuçları, beceri sayacı, zaman, oyun günlüğü. Hiçbir şey kaydedilip gönderilmez.</small></button>
+      <div class="mod-kart cocuk"><span class="e">🧒</span><b>Çocuk modu</b>
+        <small>Sade ve büyük düğmeler; danışman araçları gizli. Çıkış için PIN gerekir.</small>
+        <div class="mod-alt">
+          <button class="ince-btn" data-mod-sec="cocuk" data-alt="serbest">🎨 Serbest oyun<small>danışmansız (bekleme odası, sınıf köşesi)</small></button>
+          <button class="ince-btn" data-mod-sec="cocuk" data-alt="oturum">🤝 Oturumda sade ekran<small>danışman yanında, araçlar gizli</small></button>
+        </div></div>
+    </div>
+    <div class="pencere-dugmeler"><span id="mod-pin-durum" class="ipucu"></span><button class="ince-btn" data-pin-degistir>🔐 PIN belirle / değiştir</button></div>
+  </div>
+</div>
+
+<div id="pin-penceresi" class="pencere-arka gizli">
+  <div class="pencere pin">
+    <h3 id="pin-baslik">PIN</h3>
+    <p id="pin-aciklama" class="ipucu"></p>
+    <div id="pin-noktalar" class="pin-noktalar"></div>
+    <p id="pin-hata" class="hata-yazi"></p>
+    <div id="pin-tuslar" class="pin-tuslar"></div>
+  </div>
+</div>
+
+<div id="yetiskin-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3>🔐 Yetişkin menüsü</h3><button class="yuvarlak-btn kucuk" data-yetiskin="kapat">✖</button></div>
+    <div class="pencere-icerik yetiskin-menu">
+      <button id="yetiskin-rehber" class="buyuk-btn kucuk" data-yetiskin="rehber">📋 Rehber panelini aç</button>
+      <button class="ince-btn" data-yetiskin="danisma">🧑‍⚕️ Danışma moduna dön</button>
+      <button class="ince-btn" data-yetiskin="mod">🔁 Başka bir mod seç</button>
+    </div>
+  </div>
+</div>
+
+<div id="galeri-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis cocuk-penceresi">
+    <div class="panel-ust"><h3>🖼️ Benim hikayelerim</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div id="galeri-icerik" class="galeri"></div>
+    <img id="galeri-buyuk" class="galeri-buyuk gizli" alt="">
+  </div>
+</div>
+
+<div id="gunluk-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3 id="gunluk-baslik">📔 Oyun günlüğü</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div id="gunluk-form" class="pencere-icerik gunluk-form">
+      <p id="gunluk-ozet" class="koruma-durum acik"></p>
+      <div class="alan">Çocuğunuz ne kadar keyif aldı?<div class="keyifler" data-keyif-grup="cocuk"></div></div>
+      <div class="alan">Siz ne kadar keyif aldınız?<div class="keyifler" data-keyif-grup="ben"></div></div>
+      <label class="alan">Bugün fark ettiğim<textarea id="gunluk-not" rows="3" placeholder="ör. Hep ayıyı koruyan karakter yaptı; sonunda hepsini evin içine aldı."></textarea></label>
+      <label class="alan">Danışmana sormak istediğim<textarea id="gunluk-soru" rows="2"></textarea></label>
+      <p class="ipucu">Günlük yalnızca bu cihazda tutulur; hiçbir yere gönderilmez. Görüşmeye gelirken “Danışmana götürmek için yazdır” ile çıktısını alabilirsiniz.</p>
+      <div class="pencere-dugmeler"><span></span><button class="buyuk-btn kucuk" data-gunluk="kaydet">✔ Günlüğe yaz</button></div>
+    </div>
+    <div id="gunluk-liste" class="pencere-icerik gizli">
+      <div id="gunluk-kayitlar" class="gunluk-kayitlar"></div>
+      <div class="pencere-dugmeler"><button class="ince-btn tehlike" data-gunluk="temizle">🗑 Günlüğü sil</button><button class="buyuk-btn kucuk" data-gunluk="yazdir">🖨️ Danışmana götürmek için yazdır</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="e-nasil-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3>📖 Özel Oyun Zamanı nasıl oynanır?</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="pencere-icerik e-nasil">
+      <ol>
+        <li><b>Zamanı ayırın.</b> Haftada 3–5 kez, 10–15 dakika. Her seferinde aynı saat olursa çocuk bunu bekler. Telefon uzakta, kardeşler başka işte.</li>
+        <li><b>Oyunu o yönetsin.</b> Yeri, karakterleri, hikayeyi çocuğunuz seçer. Siz eşlik edersiniz.</li>
+        <li><b>Gördüğünüzü anlatın.</b> “Köpeği parka götürdün.” Soru sormak yerine betimlemek çocuğa “seni görüyorum” der.</li>
+        <li><b>Duyguyu söyleyin.</b> Karakterin duygusunu adlandırın: “Tavşan çok korkmuş.” Duygu adı bulmakta zorlanırsanız 📋 paneldeki “Duygu sözlüğü”ne bakın.</li>
+        <li><b>Belirli övün.</b> “Ne güzel!” yerine “Ne kadar dikkatli yerleştirdin.”</li>
+        <li><b>Düzeltmeyin, öğretmeyin, eleştirmeyin.</b> Bu zaman ders değil, birliktelik zamanı.</li>
+        <li><b>Güzel bitirin.</b> 2 dakika kala haber verin, “🏁 Oyunu bitir” ile oyuncakları birlikte uyutun ve bir sonraki oyun gününü söyleyin.</li>
+      </ol>
+      <p class="ipucu">📋 düğmesi oyun sırasında size ipuçları, beceri sayacı ve “zor anlarda” önerileri gösterir; çocuğunuz görmeden bakabilirsiniz.
+        Oyunda sizi kaygılandıran bir şey olursa bunu çocuğun yanında değil, danışmanla konuşun.</p>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/uygulama.js"></script>
+</body>
+</html>

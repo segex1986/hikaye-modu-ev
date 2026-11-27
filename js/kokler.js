@@ -1,0 +1,43 @@
+// Hikaye kökleri: danışmanın başlattığı, çocuğun sahnede tamamladığı yarım hikayeler.
+// Her kök bir ortam ve karakter yerleşimiyle gelir; danışman metni okur, sonra "Sonra ne oldu? Bana göster." der.
+// k: [karakter id, x, y, duygu?]
+export const KOKLER = [
+  { id: 'sut', ikon: '🥛', ad: 'Dökülen süt', ortam: 'mutfak', konu: 'Hata, ebeveyn tepkisi',
+    k: [['ben', 0.42, 0.74, 'endiseli'], ['anne', 0.66, 0.72]],
+    metin: 'Çocuk mutfakta süt içiyordu. Bardak elinden kaydı ve süt yere döküldü. Tam o sırada annesi mutfağa girdi.' },
+  { id: 'kabus', ikon: '🌙', ad: 'Gece kabusu', ortam: 'cocuk-odasi', hava: 'gece', konu: 'Korku, rahatlatılma',
+    k: [['ben', 0.45, 0.72, 'korkmus']],
+    metin: 'Gece herkes uyurken çocuk kötü bir rüya görüp uyandı. Oda karanlıktı ve bir ses duydu.' },
+  { id: 'kavga', ikon: '⚡', ad: 'Anne ile baba tartışıyor', ortam: 'ev-ici', konu: 'Ebeveyn çatışması',
+    k: [['anne', 0.42, 0.72, 'kizgin'], ['baba', 0.6, 0.72, 'kizgin'], ['ben', 0.8, 0.78]],
+    metin: 'Anne ile baba salonda yüksek sesle tartışıyorlar. Çocuk odadan sesleri duyup kapıya geliyor.' },
+  { id: 'kayip', ikon: '🗝️', ad: 'Kaybolan anahtar', ortam: 'ev-onu', konu: 'Sorun çözme, suçlama',
+    k: [['ben', 0.45, 0.76], ['baba', 0.62, 0.74, 'saskin'], ['anahtar', 0.3, 0.86]],
+    metin: 'Baba işe gitmek üzere ama anahtarlarını bulamıyor. "Anahtarlarımı kim aldı?" diye soruyor.' },
+  { id: 'okul-ayrilik', ikon: '🎒', ad: 'Okul kapısında', ortam: 'okul-bahcesi', konu: 'Ayrılık kaygısı',
+    k: [['ben', 0.46, 0.76, 'uzgun'], ['anne', 0.58, 0.74], ['ogretmen-k', 0.3, 0.72]],
+    metin: 'Sabah annesi çocuğu okula getirdi. Okul kapısına geldiklerinde annenin gitme zamanı geldi.' },
+  { id: 'disarida', ikon: '⚽', ad: 'Oyuna alınmamak', ortam: 'park', konu: 'Akran ilişkileri, dışlanma',
+    k: [['kiz', 0.55, 0.72], ['erkek', 0.66, 0.74], ['arkadas', 0.6, 0.66], ['ben', 0.28, 0.78], ['top', 0.62, 0.82]],
+    metin: 'Parkta çocuklar top oynuyor. Çocuk yanlarına gidip "Ben de oynayabilir miyim?" diye soruyor.' },
+  { id: 'yarali', ikon: '🩹', ad: 'Düşüp yaralanmak', ortam: 'park', konu: 'Yardım isteme, bakım',
+    k: [['ben', 0.45, 0.8, 'uzgun'], ['baba', 0.7, 0.72]],
+    metin: 'Çocuk koşarken düştü ve dizi kanadı. Canı çok yanıyor. Babası biraz uzakta duruyor.' },
+  { id: 'kardes-oyuncak', ikon: '🧸', ad: 'Kardeş oyuncağı aldı', ortam: 'cocuk-odasi', konu: 'Kardeş kıskançlığı, paylaşma',
+    k: [['ben', 0.4, 0.74, 'kizgin'], ['kardes', 0.58, 0.76, 'mutlu'], ['oyuncak-ayi', 0.6, 0.86]],
+    metin: 'Çocuğun en sevdiği oyuncağı kardeşi izinsiz aldı ve onunla oynuyor.' },
+  { id: 'hastane', ikon: '💉', ad: 'İğne olma sırası', ortam: 'muayene', konu: 'Tıbbi kaygı',
+    k: [['ben', 0.45, 0.74, 'korkmus'], ['doktor', 0.62, 0.72], ['anne', 0.3, 0.72], ['siringa', 0.7, 0.82]],
+    metin: 'Doktor "Şimdi küçük bir iğne yapacağız" dedi. Çocuk anneye baktı.' },
+  { id: 'yabanci', ikon: '🚪', ad: 'Kapıdaki yabancı', ortam: 'ev-onu', konu: 'Güvenlik, sınırlar',
+    k: [['ben', 0.42, 0.76], ['yabanci', 0.66, 0.74]],
+    metin: 'Çocuk evin önünde oynarken tanımadığı biri yanına geldi ve "Benimle gel, sana bir şey göstereceğim" dedi.' },
+  { id: 'veda', ikon: '🕊️', ad: 'Vedalaşma', ortam: 'ani-bahcesi', konu: 'Yas, kayıp',
+    k: [['ben', 0.45, 0.76, 'uzgun'], ['anneanne', 0.62, 0.72]],
+    metin: 'Çocuk ile anneannesi anı bahçesine geldiler. Burada artık aralarında olmayan birini hatırlıyorlar.' },
+  { id: 'basari', ikon: '🏆', ad: 'Karne günü', ortam: 'sinif', konu: 'Başarı, beklenti',
+    k: [['ben', 0.45, 0.76], ['ogretmen-k', 0.62, 0.7], ['kitap', 0.4, 0.86]],
+    metin: 'Bugün karne günü. Öğretmen çocuğun adını okudu ve karnesini uzattı. Çocuk eve gidince ne olacak?' },
+];
+
+export const kokBul = (id) => KOKLER.find((k) => k.id === id);
