@@ -30,14 +30,25 @@
       <button data-cocuk-kutu="ciz"><span>🖍️</span>Karakter çiz</button>
       <button data-cocuk-kutu="sakin"><span>🎈</span>Balon nefesi</button>
       <button data-cocuk-kutu="endise"><span>👾</span>Endişe canavarı</button>
+      <button data-cocuk-kutu="sosyal"><span>🤝</span>Ne yapardın?</button>
       <button data-cocuk-kutu="galeri" class="sadece-serbest"><span>🖼️</span>Benim hikayelerim</button>
     </div>
     <div class="giris-alt sadece-ebeveyn">
       <button id="btn-e-nasil" class="ince-btn">📖 Nasıl oynanır?</button>
       <button id="btn-e-gunluk" class="ince-btn">📔 Oyun günlüğüm</button>
+      <button id="btn-e-hatirlat" class="ince-btn">⏰ Hatırlatıcı</button>
+      <button id="btn-e-cocuklar" class="ince-btn">🧒 Çocuklarım</button>
     </div>
-    <button id="btn-kayitlar-giris" class="ince-btn sadece-danisma">📂 Kayıtlı hikayeler</button>
-    <button id="btn-mod" class="mod-dugmesi cocuk-degil"></button>
+    <div class="giris-alt sadece-danisma">
+      <button id="btn-kayitlar-giris" class="ince-btn">📂 Kayıtlı hikayeler</button>
+      <button id="btn-sinif" class="ince-btn">🏫 Sınıf etkinliği</button>
+    </div>
+    <div id="koruma-uyari" class="koruma-uyari gizli">🔓 Çocukların kayıtları bu bilgisayarda <b>parolasız</b> duruyor.
+      <button class="ince-btn" data-koruma-uyari="ac">🔒 Parola koy</button><button class="ince-btn" data-koruma-uyari="sonra">Bugün değil</button></div>
+    <div class="giris-alt">
+      <button id="btn-mod" class="mod-dugmesi cocuk-degil"></button>
+      <button id="btn-erisim" class="mod-dugmesi">♿ Görünüm ayarları</button>
+    </div>
   </div>
 </section>
 
@@ -145,6 +156,7 @@
           <button id="btn-kokler" class="etkinlik"><span>🌱</span>Hikaye kökleri<small>Sonra ne oldu?</small></button>
           <button id="btn-guvenli-yer" class="etkinlik"><span>🏡</span>Güvenli yerim<small>Kur, sakla, aç</small></button>
           <button id="btn-rol" class="etkinlik"><span>🪑</span>Rol değiştirme<small>Şimdi sen o ol</small></button>
+          <button id="btn-sosyal" class="etkinlik"><span>🤝</span>Ne yapardın?<small>Sosyal beceri</small></button>
           <button id="btn-kapanis" class="etkinlik"><span>🌙</span>Kapanış<small>Oyuncakları uyut</small></button>
         </div>
         <label class="secenek"><input id="sesli-oku" type="checkbox"> 🔊 Soruları ve yönergeleri sesli oku <small>(tabletin kendi sesiyle)</small></label>
@@ -158,6 +170,7 @@
         <div class="etkinlikler">
           <button id="btn-genogram" class="etkinlik"><span>🌳</span>Aile ağacı<small>Genogram</small></button>
           <button id="btn-veli" class="etkinlik"><span>👪</span>Veli / öğretmen<small>Paylaşılabilir özet</small></button>
+          <button id="btn-erehberlik" class="etkinlik"><span>📝</span>e-Rehberlik<small>Faaliyet metni</small></button>
           <button id="btn-kumanda" class="etkinlik"><span>📱</span>Telefondan yönet<small>Not, soru, tema</small></button>
           <button id="btn-kurulum" class="etkinlik"><span>📲</span>Tablete kur<small>Ana ekran simgesi</small></button>
         </div>
@@ -232,7 +245,8 @@
         <div class="ichava-satir"><select id="e-sure"><option value="">Süre seçin</option><option value="10">10 dakika</option><option value="15">15 dakika</option><option value="20">20 dakika</option></select><b id="sure-kalan-e"></b></div>
         <small class="ipucu">Bitime 2 dakika kala 📋 düğmesi turuncu yanıp söner.</small></div>
 
-      <div class="e-ipucu-kart"><p id="e-ipucu"></p><button class="ince-btn" data-e="ipucu">Sonraki ipucu ›</button></div>
+      <div id="e-kim" class="e-kim gizli"></div>
+      <div class="e-ipucu-kart"><p id="e-ipucu"></p><button class="ince-btn" data-e="ipucu">Sonraki ipucu ›</button> <button class="dinle-btn" data-dinle="#e-ipucu" aria-label="Sesli dinle">🔊</button></div>
 
       <details open><summary>✅ Bugün kaç kez yaptım?</summary>
         <p class="ipucu">Her yaptığınızda ilgili düğmeye dokunun. Amaç sayı değil, fark etmek.</p>
@@ -248,6 +262,7 @@
           <button class="etkinlik" data-e="ichava"><span>🌤️</span>İçindeki hava<small>Bugün nasılsın?</small></button>
           <button class="etkinlik" data-e="sakin"><span>🎈</span>Balon nefesi<small>Sakinleşme</small></button>
           <button class="etkinlik" data-e="endise"><span>👾</span>Endişe canavarı<small>Endişeyi yedir</small></button>
+          <button class="etkinlik" data-e="sosyal"><span>🤝</span>Ne yapardın?<small>Sosyal beceri</small></button>
           <button class="etkinlik" data-e="bitir"><span>🏁</span>Oyunu bitir<small>Oyuncakları uyut</small></button>
         </div>
       </details>
@@ -379,6 +394,7 @@
       <button id="btn-koruma" class="ince-btn">🔒 Parola koruması</button>
       <button id="btn-yedek-al" class="ince-btn">💾 Yedek al</button>
       <label class="ince-btn">📥 Yedekten yükle<input id="yedek-dosya" type="file" accept=".zip,application/zip" hidden></label>
+      <label class="ince-btn" title="Ebeveynin ev sürümünden gönderdiği oyun günlüğü dosyası">🏠 Ev günlüğü ekle<input id="ev-gunluk-dosya" type="file" accept=".json,application/json" hidden></label>
     </div>
   </div>
 </div>
@@ -596,6 +612,7 @@
     <div class="panel-ust"><h3 id="gunluk-baslik">📔 Oyun günlüğü</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
     <div id="gunluk-form" class="pencere-icerik gunluk-form">
       <p id="gunluk-ozet" class="koruma-durum acik"></p>
+      <label id="gunluk-kim-alan" class="alan gizli">Kiminle oynadınız?<select id="gunluk-kim"></select></label>
       <div class="alan">Çocuğunuz ne kadar keyif aldı?<div class="keyifler" data-keyif-grup="cocuk"></div></div>
       <div class="alan">Siz ne kadar keyif aldınız?<div class="keyifler" data-keyif-grup="ben"></div></div>
       <label class="alan">Bugün fark ettiğim<textarea id="gunluk-not" rows="3" placeholder="ör. Hep ayıyı koruyan karakter yaptı; sonunda hepsini evin içine aldı."></textarea></label>
@@ -605,7 +622,11 @@
     </div>
     <div id="gunluk-liste" class="pencere-icerik gizli">
       <div id="gunluk-kayitlar" class="gunluk-kayitlar"></div>
-      <div class="pencere-dugmeler"><button class="ince-btn tehlike" data-gunluk="temizle">🗑 Günlüğü sil</button><button class="buyuk-btn kucuk" data-gunluk="yazdir">🖨️ Danışmana götürmek için yazdır</button></div>
+      <div class="ev-gonder">
+        <label class="alan">Danışmanınızın verdiği kod <input id="ev-kod" maxlength="20" placeholder="ör. D-12" autocomplete="off"></label>
+        <p class="ipucu">“Danışmana gönder” günlüğü küçük bir dosya yapar; dosyayı WhatsApp ya da e-postayla siz gönderirsiniz. Program kendisi hiçbir yere bilgi göndermez.</p>
+      </div>
+      <div class="pencere-dugmeler"><button class="ince-btn tehlike" data-gunluk="temizle">🗑 Günlüğü sil</button><span class="dugme-grup"><button class="ince-btn" data-gunluk="yazdir">🖨️ Yazdır</button><button class="buyuk-btn kucuk" data-gunluk="gonder">📤 Danışmana gönder</button></span></div>
     </div>
   </div>
 </div>
@@ -614,6 +635,7 @@
   <div class="pencere genis">
     <div class="panel-ust"><h3>📖 Özel Oyun Zamanı nasıl oynanır?</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
     <div class="pencere-icerik e-nasil">
+      <p><button class="ince-btn" data-dinle=".e-nasil ol">🔊 Sesli dinle</button></p>
       <ol>
         <li><b>Zamanı ayırın.</b> Haftada 3–5 kez, 10–15 dakika. Her seferinde aynı saat olursa çocuk bunu bekler. Telefon uzakta, kardeşler başka işte.</li>
         <li><b>Oyunu o yönetsin.</b> Yeri, karakterleri, hikayeyi çocuğunuz seçer. Siz eşlik edersiniz.</li>
@@ -626,6 +648,82 @@
       <p class="ipucu">📋 düğmesi oyun sırasında size ipuçları, beceri sayacı ve “zor anlarda” önerileri gösterir; çocuğunuz görmeden bakabilirsiniz.
         Oyunda sizi kaygılandıran bir şey olursa bunu çocuğun yanında değil, danışmanla konuşun.</p>
     </div>
+  </div>
+</div>
+
+<div id="sosyal-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3 id="sosyal-baslik">🤝 Sen olsan ne yapardın?</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div id="sosyal-icerik" class="pencere-icerik sosyal"></div>
+  </div>
+</div>
+
+<div id="erehberlik-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3>📝 e-Rehberlik faaliyet metni</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="pencere-icerik">
+      <label class="alan">Faaliyet türü
+        <select id="erehberlik-tur"><option value="bireysel">Bireysel görüşme (öğrenci)</option><option value="sinif">Sınıf rehberlik etkinliği</option></select></label>
+      <textarea id="erehberlik-metin" class="erehberlik-metin" rows="9"></textarea>
+      <p class="ipucu">Metin oturumda kullanılan çalışmalardan hazırlanır; çocuğun adı ya da söyledikleri yazılmaz. e-Rehberlik’e girmeden önce okuyup düzenleyin;
+        hedef alanına yazdığınız bilgilerin kimlik belirtmediğinden emin olun.</p>
+      <div class="pencere-dugmeler"><button class="ince-btn" data-erehberlik="yenile">↻ Yeniden oluştur</button><button class="buyuk-btn kucuk" data-erehberlik="kopyala">📋 Kopyala</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="evgunluk-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3 id="evgunluk-baslik">🏠 Ev oyun günlüğü</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div id="evgunluk-icerik" class="pencere-icerik izlem"></div>
+    <div class="pencere-dugmeler"><span class="ipucu">Ebeveynin ev sürümünden gönderdiği günlük.</span><button class="ince-btn" data-evgunluk="yazdir">🖨️ Yazdır / PDF</button></div>
+  </div>
+</div>
+
+<div id="hatirlat-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3>⏰ Oyun zamanı hatırlatıcısı</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="pencere-icerik">
+      <p class="ipucu">Telefonunuzun takvimine her hafta tekrar eden bir “Özel oyun zamanı” eklenir; 10 dakika önce hatırlatır. Hiçbir yere bilgi gönderilmez.</p>
+      <div class="alan">Hangi günler?<div id="hatirlat-gunler" class="gun-secim"></div></div>
+      <div class="ichava-satir">
+        <label class="alan">Saat <input id="hatirlat-saat" type="time" value="19:00"></label>
+        <label class="alan">Süre <select id="hatirlat-sure"><option value="10">10 dakika</option><option value="15" selected>15 dakika</option><option value="20">20 dakika</option></select></label>
+      </div>
+      <p class="ipucu">Haftada 3–5 kez, hep aynı saatte olması çocuğun bu zamanı beklemesini sağlar.</p>
+      <div class="pencere-dugmeler"><span></span><button class="buyuk-btn kucuk" data-hatirlat="olustur">📅 Takvime ekle</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="cocuklar-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3>🧒 Çocuklarım</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="pencere-icerik">
+      <p class="ipucu">Birden çok çocuğunuzla oynuyorsanız takma adlarını ekleyin (gerçek ad gerekmez; ör. “Büyük”, “Minik”). Günlükte kiminle oynadığınızı seçersiniz.</p>
+      <div id="cocuk-listesi" class="cocuk-listesi"></div>
+      <div class="ichava-satir"><input id="cocuk-yeni" maxlength="16" placeholder="Takma ad" autocomplete="off"><button class="buyuk-btn kucuk" data-cocuk="ekle">＋ Ekle</button></div>
+      <p class="ipucu"><b>Kardeşlerle:</b> En iyisi her çocuğa ayrı özel oyun zamanıdır. Birlikte oynuyorsanız 📋 panelindeki “🔄 Sıra değiştir” ile hikayeyi sırayla bir çocuk yönetsin; süre seçtiyseniz her sıra için yeniden başlar.</p>
+    </div>
+  </div>
+</div>
+
+<div id="sinif-penceresi" class="pencere-arka gizli">
+  <div class="pencere genis">
+    <div class="panel-ust"><h3>🏫 Sınıf rehberlik etkinliği</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="pencere-icerik">
+      <p class="ipucu">Akıllı tahtada bütün sınıfla birlikte bir hikaye kurun. Düğmeler büyür; konuya uygun sorular ve etkinlik önerisi 📋 panelinde gelir. Kayıt danışan kodu istemez.</p>
+      <div id="sinif-listesi" class="senaryo-listesi"></div>
+      <div class="pencere-dugmeler"><span></span><button class="ince-btn" data-sinif-tam>📺 Tam ekran</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="erisim-penceresi" class="pencere-arka gizli">
+  <div class="pencere">
+    <div class="panel-ust"><h3>♿ Görünüm ayarları</h3><button class="yuvarlak-btn kucuk" data-kapat>✖</button></div>
+    <div class="pencere-icerik"><div id="erisim-listesi" class="erisim-listesi"></div>
+      <p class="ipucu">Ayarlar bu cihazda saklanır.</p></div>
   </div>
 </div>
 

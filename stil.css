@@ -976,3 +976,73 @@ body:not(.cocuk-serbest) .cocuk-kutular { grid-template-columns: repeat(3, 1fr);
 body.ev-surumu [data-mod-sec="danisma"], body.ev-surumu [data-alt="oturum"], body.ev-surumu [data-yetiskin="danisma"],
 body.ev-surumu #yetiskin-rehber, body.ev-surumu .sadece-danisma { display: none !important; }
 body.ev-surumu .mod-kartlari { grid-template-columns: repeat(2, 1fr); }
+
+/* ================= Yeni: sosyal beceri, ev günlüğü, hatırlatıcı, sınıf, erişilebilirlik ================= */
+.koruma-uyari { margin-top: 10px; padding: 8px 12px; border-radius: 14px; background: #fff3e0; border: 2px solid #ffcc80; color: #6d4c41; font-size: .9rem; line-height: 1.6; }
+.koruma-uyari .ince-btn { margin-left: 6px; padding: 2px 10px; font-size: .82rem; }
+.dinle-btn { border: 0; background: #fff; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; cursor: pointer; box-shadow: 0 1px 4px rgba(0, 0, 0, .15); vertical-align: middle; font-family: var(--emoji); }
+.dinle-btn:active { background: #e3f2fd; }
+.cocuk-kutular { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important; }
+
+.sosyal-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.sosyal-kart { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 8px; border-radius: 20px; border: 3px solid #e3ecf7; background: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+.sosyal-kart span { font-size: 2.4rem; font-family: var(--emoji); }
+.sosyal-kart i { position: absolute; top: 6px; right: 8px; font-style: normal; font-family: var(--emoji); }
+.sosyal-kart:hover { border-color: #42a5f5; }
+.sosyal-sahne { text-align: center; font-size: clamp(2.6rem, 8vw, 4.4rem); font-family: var(--emoji); letter-spacing: 6px; margin: 4px 0 8px; }
+.sosyal-metin { font-size: 1.2rem; font-weight: 700; line-height: 1.5; text-align: center; margin: 0 0 6px; }
+.sosyal-soru { text-align: center; color: #1565c0; font-size: 1.15rem; margin: 6px 0 10px; }
+.sosyal-secenekler { display: flex; flex-direction: column; gap: 8px; }
+.sosyal-secenek { display: flex; align-items: center; gap: 10px; text-align: left; padding: 12px 14px; border-radius: 18px; border: 3px solid #e3ecf7; background: #fff; font: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; }
+.sosyal-secenek span { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #e3f2fd; color: #1565c0; font-weight: 900; }
+.sosyal-secenek.iyi { border-color: #43a047; background: #e8f5e9; }
+.sosyal-secenek.denendi { border-color: #ffb74d; background: #fff8e1; }
+.sosyal-secenek:disabled { cursor: default; }
+.sosyal-sonuc { margin-top: 12px; padding: 12px 14px; border-radius: 16px; font-size: 1.1rem; font-weight: 700; line-height: 1.5; }
+.sosyal-sonuc.iyi { background: #e8f5e9; color: #1b5e20; }
+.sosyal-sonuc.dene { background: #fff8e1; color: #6d4c41; }
+.sosyal-sonuc .ipucu { font-weight: 500; margin: 6px 0 0; }
+
+.e-kim { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-radius: 14px; background: #e8f5e9; font-weight: 700; }
+.e-kim .ince-btn { padding: 3px 10px; font-size: .85rem; }
+.gun-secim { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.gun-secim label { cursor: pointer; }
+.gun-secim input { position: absolute; opacity: 0; pointer-events: none; }
+.gun-secim span { display: inline-block; min-width: 44px; text-align: center; padding: 8px 6px; border-radius: 12px; border: 2px solid #e3ecf7; background: #fff; font-weight: 800; }
+.gun-secim input:checked + span { border-color: #ffb300; background: #fff8e1; }
+.gun-secim input:focus-visible + span { outline: 3px solid #42a5f5; }
+.cocuk-listesi { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+.cocuk-etiket { display: inline-flex; align-items: center; gap: 6px; padding: 6px 6px 6px 12px; border-radius: 20px; background: #fff3e0; font-weight: 700; }
+.cocuk-etiket button { border: 0; background: #fff; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; }
+#cocuk-yeni { flex: 1; border-radius: 12px; border: 2px solid #e3ecf7; padding: 8px 10px; font: inherit; }
+.ev-gonder { margin-top: 10px; padding: 10px 12px; border-radius: 14px; background: #f1f8ff; }
+.ev-gonder input { width: 100%; box-sizing: border-box; border-radius: 12px; border: 2px solid #e3ecf7; padding: 8px 10px; font: inherit; margin-top: 4px; }
+.dugme-grup { display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.erehberlik-metin { width: 100%; box-sizing: border-box; border-radius: 12px; border: 2px solid #e3ecf7; padding: 10px 12px; font: inherit; line-height: 1.55; margin-top: 8px; }
+.kayit.ev-gunlugu { background: #fffdf3; border-color: #ffe0b2; }
+.risk-sayi { color: #c62828; }
+
+.erisim-listesi { display: flex; flex-direction: column; gap: 8px; }
+.erisim-secenek { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 14px; border: 2px solid #e3ecf7; cursor: pointer; }
+.erisim-secenek input { width: 22px; height: 22px; margin-top: 2px; }
+.erisim-secenek span { display: flex; flex-direction: column; }
+.erisim-secenek small { color: var(--soluk); }
+.renk-ornek { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.renk-ornek span { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-family: var(--emoji); }
+
+/* Sınıf etkinliği: akıllı tahtada uzaktan görülebilsin */
+body.sinif-modu .sahne-ust .yuvarlak-btn { width: 66px; height: 66px; font-size: 1.8rem; }
+body.sinif-modu #rehber-paneli { width: min(560px, 96vw); font-size: 1.12rem; }
+body.sinif-modu .soru { font-size: 1.1rem; padding: 10px 14px; }
+body.sinif-modu .isim { font-size: 1.25em; }
+
+/* Erişilebilirlik ayarları (html sınıfları) */
+html.er-buyuk { font-size: 118%; }
+html.er-buyuk .yuvarlak-btn { min-width: 56px; min-height: 56px; }
+html.er-okuma body, html.er-okuma button, html.er-okuma input, html.er-okuma textarea, html.er-okuma select {
+  font-family: Verdana, Tahoma, 'Segoe UI', sans-serif; letter-spacing: .03em; word-spacing: .12em; }
+html.er-okuma p, html.er-okuma li, html.er-okuma small { line-height: 1.7; }
+html.er-karsitlik { --soluk: #263238; }
+html.er-karsitlik .ipucu, html.er-karsitlik small { color: #1a1a1a !important; }
+html.er-karsitlik .ince-btn, html.er-karsitlik .etkinlik, html.er-karsitlik .pencere, html.er-karsitlik .sosyal-secenek, html.er-karsitlik .sosyal-kart { border-color: #37474f !important; }
+html.er-hareket *, html.er-hareket *::before, html.er-hareket *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }

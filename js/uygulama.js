@@ -6,6 +6,7 @@ import { karakterSvg, TEN } from './cizimler.js';
 import { SENARYOLAR, senaryoBul } from './senaryolar.js';
 import { DILLER, ikiDil, cevir } from './ceviri.js';
 import { KOKLER, kokBul } from './kokler.js';
+import { SOSYAL, sosyalBul, SINIF_TEMALARI, sinifBul } from './beceriler.js';
 
 const $ = (s) => document.querySelector(s);
 const kacis = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -87,6 +88,8 @@ function yeniDurum() {
     kokler: [], guvenliYer: null, roller: [], genogram: null, genogramAyar: {}, veli: null, perdeKapali: false,
     // Danışma: oturum hedefi, risk ve koruma işaretleri. Ebeveyn modu: beceri sayaçları.
     hedef: '', hedefDurumu: '', riskler: [], riskNot: '', ebeveyn: null,
+    // Sosyal beceri senaryolarında verilen yanıtlar; sınıf etkinliği teması.
+    sosyal: [], sinif: null,
   };
 }
 
@@ -143,6 +146,7 @@ function taslakOku() {
 
 function durumYukle(veri) {
   durum = { ...yeniDurum(), ...veri };
+  document.body.classList.toggle('sinif-modu', !!durum.sinif);
   ozelKaydet(durum.ozel);
   // Bağlar karakterlere uid ile bağlı olduğu için kayıttaki uid korunur (eski kayıtlarda sıra numarası verilir).
   const kullanilan = new Set();
@@ -1549,6 +1553,7 @@ $('#btn-kaydet').addEventListener('click', async () => {
     dilekler: durum.dilekler, kumIzleri: durum.kumIzleri, dil: durum.dil,
     kokler: durum.kokler, guvenliYer: durum.guvenliYer, roller: durum.roller, genogram: durum.genogram, genogramAyar: durum.genogramAyar, veli: durum.veli, perdeKapali: durum.perdeKapali,
     hedef: durum.hedef, hedefDurumu: durum.hedefDurumu, riskler: durum.riskler, riskNot: durum.riskNot,
+    sosyal: durum.sosyal, sinif: durum.sinif,
     baslangic: durum.baslangic, sureDk: Math.round((Date.now() - durum.baslangic) / 60000), isimGoster: durum.isimGoster,
   };
   try {
@@ -1585,9 +1590,9 @@ async function kayitlariAc() {
     if (!y.ok) throw new Error(y.status);
     const kayitlar = await y.json();
     liste.innerHTML = kayitlar.length
-      ? kayitlar.map((k) => `<div class="kayit" data-id="${kacis(k.id)}">
-          <div class="bilgi"><b>${kacis(k.kod || 'Kodsuz')} · ${kacis(k.ortamAd || '')}</b>
-          <small>${k.tarih ? new Date(k.tarih).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' }) : ''} · ${k.karakterSayisi} karakter</small></div>
+      ? kayitlar.map((k) => `<div class="kayit${k.tur === 'ev-gunlugu' ? ' ev-gunlugu' : ''}" data-id="${kacis(k.id)}" data-tur="${kacis(k.tur || '')}">
+          <div class="bilgi"><b>${kacis(k.kod || 'Kodsuz')} · ${k.tur === 'ev-gunlugu' ? '🏠 Ev oyun günlüğü' : kacis(k.ortamAd || '')}</b>
+          <small>${k.tarih ? new Date(k.tarih).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' }) : ''} · ${k.tur === 'ev-gunlugu' ? `${k.gunlukSayisi || 0} ev oyunu` : `${k.karakterSayisi} karakter`}</small></div>
           ${k.kod ? `<button data-islem="izlem" data-kod="${kacis(k.kod)}" title="Bu danışan kodunun bütün oturumlarını karşılaştır">📈 İzlem</button>` : ''}
           <button data-islem="ac">Aç</button><button class="sil" data-islem="sil">Sil</button></div>`).join('')
       : '<p class="bos-mesaj">Henüz kayıtlı hikaye yok.</p>';
@@ -1610,6 +1615,7 @@ $('#kayit-listesi').addEventListener('click', async (e) => {
     const y = await kayitIstek('api/kayitlar/' + encodeURIComponent(id));
     if (!y.ok) throw new Error(y.status);
     const veri = await y.json();
+    if (veri.tur === 'ev-gunlugu') return evGunluguGoster(veri);
     durumYukle({ ...veri, ortamId: veri.ortam, sahneBasladi: true });
     $('#kayit-penceresi').classList.add('gizli');
     ses.baslat();
@@ -1653,7 +1659,7 @@ document.addEventListener('keydown', (e) => {
   if (!$('#sakin-penceresi').classList.contains('gizli')) return sakinKapat();
   if (!$('#pin-penceresi').classList.contains('gizli')) return;
   if (!$('#kapanis').classList.contains('gizli')) return kapanisBitir();
-  for (const id of ['senaryo', 'ichava', 'beden', 'endise', 'koruma', 'kok', 'guvenli', 'guc', 'rol', 'genogram', 'veli', 'kumanda', 'kisayol', 'kurulum', 'mod', 'yetiskin', 'galeri', 'gunluk', 'e-nasil']) if (!$(`#${id}-penceresi`).classList.contains('gizli')) return $(`#${id}-penceresi`).classList.add('gizli');
+  for (const id of ['senaryo', 'ichava', 'beden', 'endise', 'koruma', 'kok', 'guvenli', 'guc', 'rol', 'genogram', 'veli', 'kumanda', 'kisayol', 'kurulum', 'mod', 'yetiskin', 'galeri', 'gunluk', 'e-nasil', 'sosyal', 'erehberlik', 'evgunluk', 'hatirlat', 'cocuklar', 'erisim', 'sinif']) if (!$(`#${id}-penceresi`).classList.contains('gizli')) return $(`#${id}-penceresi`).classList.add('gizli');
   if (!$('#parola-penceresi').classList.contains('gizli')) { $('#parola-penceresi').classList.add('gizli'); parolaCevap?.(false); parolaCevap = null; return; }
   if (dilek) return dilekBitir(false);
   if (rol) return rolBitir();
@@ -2038,7 +2044,8 @@ async function izlemAc(kod) {
     const kayitlar = [];
     for (const k of ayni) kayitlar.push(await kayitIstek('api/kayitlar/' + encodeURIComponent(k.id)).then((y) => y.json()));
     kayitlar.sort((a, b) => new Date(a.tarih || a.baslangic) - new Date(b.tarih || b.baslangic));
-    icerik.innerHTML = izlemHTML(kod, kayitlar);
+    const ev = kayitlar.filter((k) => k.tur === 'ev-gunlugu');
+    icerik.innerHTML = izlemHTML(kod, kayitlar.filter((k) => k.tur !== 'ev-gunlugu')) + evIzlemHTML(ev);
   } catch {
     icerik.innerHTML = '<p class="bos-mesaj">Kayıtlar okunamadı.</p>';
   }
@@ -2073,7 +2080,8 @@ function izlemHTML(kod, kayitlar) {
     const karakterler = (k.karakterler || []).map((c) => c.emoji || '').join(' ');
     const ic = (an) => icHavaBul(k.icHava?.[an])?.emoji || '·';
     return `<tr><td>${i + 1}</td><td>${tarih(k).toLocaleDateString('tr-TR', { dateStyle: 'medium' })}</td><td>${k.sureDk ?? '—'} dk</td><td>${ortamlar}</td><td>${k.icHava?.bas || k.icHava?.son ? `${ic('bas')} → ${ic('son')}` : '—'}</td><td>${(k.temalar || []).map((id) => temaBul(id)?.ad).filter(Boolean).join(', ') || '—'}</td>
-      <td>${duygular || '—'}</td><td>${ort}</td><td>${karakterler || '—'}</td><td>${(k.alanlar || []).length || '—'}</td><td>${(k.baglar || []).length || '—'}</td></tr>`;
+      <td>${duygular || '—'}</td><td>${ort}</td><td>${karakterler || '—'}</td><td>${(k.alanlar || []).length || '—'}</td><td>${(k.baglar || []).length || '—'}</td>
+      <td>${k.hedef ? `${kacis(k.hedef)}${k.hedefDurumu ? ` <i>(${HEDEF_DURUMLARI[k.hedefDurumu] || ''})</i>` : ''}` : '—'}</td><td>${(k.riskler || []).length ? `<b class="risk-sayi">⚠️ ${(k.riskler || []).length}</b>` : '—'}</td></tr>`;
   }).join('');
   // Birden çok oturumda tekrar eden karakterler ve ortamlar.
   const tekrar = (liste) => Object.entries(liste.reduce((s, x) => ({ ...s, [x]: (s[x] || 0) + 1 }), {})).filter(([, n]) => n > 1).sort((a, b) => b[1] - a[1]);
@@ -2088,14 +2096,14 @@ function izlemHTML(kod, kayitlar) {
     <svg class="izlem-grafik" viewBox="0 0 ${W} ${H + 24}"><path d="M${sol} 0 V${H} H${W}" stroke="#c9d8ec" fill="none"/>${cubuklar}</svg>
     <div class="lejant">${lejant}</div>
     <h4>Oturumlar</h4>
-    <div class="tablo-kap"><table class="izlem-tablo"><tr><th>#</th><th>Tarih</th><th>Süre</th><th>Ortamlar</th><th>İç hava</th><th>Temalar</th><th>Duygular</th><th>Ort. şiddet</th><th>Karakterler</th><th>🛡️</th><th>🔗</th></tr>${satirlar}</table></div>
+    <div class="tablo-kap"><table class="izlem-tablo"><tr><th>#</th><th>Tarih</th><th>Süre</th><th>Ortamlar</th><th>İç hava</th><th>Temalar</th><th>Duygular</th><th>Ort. şiddet</th><th>Karakterler</th><th>🛡️</th><th>🔗</th><th>🎯 Hedef</th><th>Risk</th></tr>${satirlar}</table></div>
     <h4>Tekrar edenler</h4>
     <ul class="izlem-tekrar">
       <li><b>En sık duygular:</b> ${enSik || '—'}</li>
       <li><b>Birden çok oturumda yer alan karakterler:</b> ${karTekrar.map(([a, n]) => `${kacis(a)} (${n})`).join(', ') || '—'}</li>
       <li><b>Tekrar eden temalar:</b> ${tekrar(kayitlar.flatMap((k) => k.temalar || [])).map(([id, n]) => `${kacis(temaBul(id)?.ad || id)} (${n})`).join(', ') || '—'}</li>
       <li><b>Tekrar seçilen ortamlar:</b> ${ortTekrar.map(([id, n]) => { const o = ORTAMLAR.find((x) => x.id === id); return o ? `${o.ikon} ${o.ad} (${n})` : ''; }).filter(Boolean).join(', ') || '—'}</li>
-    </ul>` : '<p class="bos-mesaj">Bu kodla kayıt bulunamadı.</p>'}`;
+    </ul>` : '<p class="bos-mesaj">Bu kodla kaydedilmiş oyun oturumu yok.</p>'}`;
 }
 
 $('#izlem-penceresi').addEventListener('click', (e) => {
@@ -2279,10 +2287,11 @@ $('#dil-secimi').addEventListener('change', (e) => {
 
 // ================= Soru kartları ve hazır senaryolar =================
 function soruKartlariCiz() {
-  const s = senaryoBul(durum.senaryo);
+  const s = senaryoBul(durum.senaryo), sn = sinifBul(durum.sinif);
   const gruplar = Object.entries(SORULAR);
   if (s) gruplar.unshift([`${s.ikon} Senaryo: ${s.ad}`, s.sorular]);
-  $('#soru-kartlari').innerHTML = (s ? `<p class="senaryo-ipucu">💡 ${kacis(s.ipucu)}</p>` : '') + gruplar.map(([grup, liste]) => `
+  if (sn) gruplar.unshift([`🏫 Sınıfla: ${sn.ikon} ${sn.ad}`, sn.sorular]);
+  $('#soru-kartlari').innerHTML = (sn ? `<p class="senaryo-ipucu">🏫 Sınıf etkinliği: ${kacis(sn.etkinlik)}</p>` : '') + (s ? `<p class="senaryo-ipucu">💡 ${kacis(s.ipucu)}</p>` : '') + gruplar.map(([grup, liste]) => `
     <div class="soru-grup"><h4>${kacis(grup)}</h4>${liste.map((q) => `<button class="soru ${durum.sorulanlar.includes(q) ? 'soruldu' : ''}" data-soru="${kacis(q)}">${ik(q)}</button>`).join('')}</div>`).join('');
 }
 
@@ -3477,7 +3486,7 @@ function raporEkleri() {
   const roller = durum.roller.map((r, i) => `<div class="dilek-rapor"><p><b>${i + 1}. ${kacis(r.a)} ↔ ${kacis(r.b)}</b> · ${zaman(r.t)} · ${r.degisim} kez taraf değişti</p>
     ${r.satirlar.length ? `<ol>${r.satirlar.map((s) => `<li><b>${kacis(s.kim)}:</b> “${kacis(s.metin)}”</li>`).join('')}</ol>` : ''}</div>`).join('');
   const g = durum.guvenliYer;
-  return `${kokler ? `<h2>Hikaye kökleri</h2>${kokler}` : ''}
+  return `${sosyalRaporu()}${kokler ? `<h2>Hikaye kökleri</h2>${kokler}` : ''}
     ${roller ? `<h2>Rol değiştirme (boş sandalye)</h2>${roller}` : ''}
     ${g ? `<h2>Güvenli yer: “${kacis(g.ad)}”</h2><div class="dilek-rapor">${g.resim ? `<figure style="max-width:120mm"><img src="${g.resim}" alt=""></figure>` : ''}
       <p>${kacis(ortamBul(g.ortam).ad)} · ${g.sahnede.map((k) => kacis(karakterAdi(k))).join(', ') || 'karakter yok'}</p></div>` : ''}
@@ -3812,6 +3821,7 @@ $('.cocuk-kutular').addEventListener('click', (e) => {
   if (k === 'sakin') sakinAc();
   if (k === 'endise') endiseAc();
   if (k === 'galeri') galeriAc();
+  if (k === 'sosyal') sosyalAc();
 });
 
 const GALERI_ANAHTAR = 'hikaye-modu-galeri';
@@ -3895,10 +3905,11 @@ function ebeveynPanelAc() {
 function ebeveynCiz() {
   const e = durum.ebeveyn;
   $('#e-ipucu').textContent = IPUCLARI[ipucuI % IPUCLARI.length];
+  kimCiz();
   $('#e-beceriler').innerHTML = BECERILER.map((b) => `<button class="beceri" data-beceri="${b.id}" title="${kacis(b.ornek)}"><span>${b.ikon}</span>${b.ad}<b>${e.beceriler[b.id] || 0}</b><small>${kacis(b.ornek)}</small></button>`).join('');
   $('#e-kacin').innerHTML = KACIN.map((k) => `<li>${kacis(k)}</li>`).join('');
   $('#e-duygular').innerHTML = DUYGULAR.map((d) => `<li><b>${d.emoji} ${d.ad}:</b> ${kacis(DUYGU_CUMLELERI[d.id] || '')}</li>`).join('');
-  $('#e-zor').innerHTML = ZOR_ANLAR.map(([b, m]) => `<details><summary>${kacis(b)}</summary><p>${kacis(m)}</p></details>`).join('');
+  $('#e-zor').innerHTML = ZOR_ANLAR.map(([b, m]) => `<details><summary>${kacis(b)}</summary><p>${kacis(m)} <button class="dinle-btn" data-dinle aria-label="Sesli dinle">🔊</button></p></details>`).join('');
 }
 
 function sureAyarla(dk) {
@@ -3923,6 +3934,8 @@ $('#ebeveyn-paneli').addEventListener('click', (e) => {
   if (i === 'endise') endiseAc();
   if (i === 'ichava') icHavaSor(durum.icHava.bas ? 'son' : 'bas');
   if (i === 'bitir') { ebeveynBitiyor = true; kapanisRituali(); }
+  if (i === 'sosyal') { rehberKapat(); sosyalAc(); }
+  if (i === 'sira') siraDegistir();
 });
 $('#e-sure').addEventListener('change', (e) => { sureAyarla(e.target.value); if (sureHedef) bildir(`⏱️ ${sureHedef} dakikalık özel oyun zamanı başladı`); });
 
@@ -3940,6 +3953,7 @@ function gunlukFormAc() {
   document.querySelectorAll('[data-keyif-grup]').forEach((g) => { g.innerHTML = KEYIFLER.map((k, i) => `<button data-keyif="${i + 1}">${k}</button>`).join(''); });
   $('#gunluk-not').value = ''; $('#gunluk-soru').value = '';
   const e = durum.ebeveyn?.beceriler || {};
+  gunlukKimCiz();
   $('#gunluk-ozet').innerHTML = `${BECERILER.map((b) => `${b.ikon} ${b.ad}: <b>${e[b.id] || 0}</b>`).join(' · ')}`;
   pencereAc('gunluk');
 }
@@ -3949,7 +3963,7 @@ function gunlukListeAc() {
   $('#gunluk-form').classList.add('gizli');
   $('#gunluk-liste').classList.remove('gizli');
   $('#gunluk-baslik').textContent = '📔 Oyun günlüğüm';
-  $('#gunluk-kayitlar').innerHTML = liste.length ? liste.map((g) => `<div class="gunluk-kart"><b>${new Date(g.t).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })}</b> · ${g.sureDk} dk
+  $('#gunluk-kayitlar').innerHTML = liste.length ? liste.map((g) => `<div class="gunluk-kart"><b>${new Date(g.t).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })}</b> · ${g.sureDk} dk${g.kim ? ` · 🧒 ${kacis(g.kim)}` : ''}
       <div>Çocuğun keyfi: ${KEYIFLER[g.cocuk - 1] || '—'} · Benim keyfim: ${KEYIFLER[g.ben - 1] || '—'}</div>
       <div class="gunluk-beceri">${BECERILER.map((b) => `${b.ikon} ${g.beceriler?.[b.id] || 0}`).join('  ')}</div>
       ${g.not ? `<p>📝 ${kacis(g.not)}</p>` : ''}${g.soru ? `<p>❓ ${kacis(g.soru)}</p>` : ''}</div>`).join('')
@@ -3959,8 +3973,8 @@ function gunlukListeAc() {
 
 function gunlukHTML(liste) {
   return `<h1>Özel Oyun Zamanı — Oyun Günlüğü</h1><p class="alt-baslik">Danışmanla paylaşmak için · ${new Date().toLocaleDateString('tr-TR', { dateStyle: 'long' })}</p>
-    <table><tr><th>Tarih</th><th>Süre</th><th>Çocuğun keyfi</th><th>Benim keyfim</th><th>Betimleme</th><th>Övgü</th><th>Duygu</th><th>Taklit</th></tr>
-    ${liste.map((g) => `<tr><td>${new Date(g.t).toLocaleDateString('tr-TR')}</td><td>${g.sureDk} dk</td><td>${KEYIFLER[g.cocuk - 1] || '—'}</td><td>${KEYIFLER[g.ben - 1] || '—'}</td>${BECERILER.map((b) => `<td>${g.beceriler?.[b.id] || 0}</td>`).join('')}</tr>`).join('')}</table>
+    <table><tr><th>Tarih</th><th>Çocuk</th><th>Süre</th><th>Çocuğun keyfi</th><th>Benim keyfim</th><th>Betimleme</th><th>Övgü</th><th>Duygu</th><th>Taklit</th></tr>
+    ${liste.map((g) => `<tr><td>${new Date(g.t).toLocaleDateString('tr-TR')}</td><td>${kacis(g.kim || '—')}</td><td>${g.sureDk} dk</td><td>${KEYIFLER[g.cocuk - 1] || '—'}</td><td>${KEYIFLER[g.ben - 1] || '—'}</td>${BECERILER.map((b) => `<td>${g.beceriler?.[b.id] || 0}</td>`).join('')}</tr>`).join('')}</table>
     ${liste.filter((g) => g.not || g.soru).map((g) => `<p><b>${new Date(g.t).toLocaleDateString('tr-TR')}:</b> ${g.not ? kacis(g.not) : ''}${g.soru ? `<br>❓ ${kacis(g.soru)}` : ''}</p>`).join('')}`;
 }
 
@@ -3977,7 +3991,7 @@ $('#gunluk-penceresi').addEventListener('click', (e) => {
   if (i === 'kaydet') {
     const e2 = durum.ebeveyn || { baslangic: durum.baslangic, beceriler: {} };
     const kayit = { t: Date.now(), sureDk: Math.max(1, Math.round((Date.now() - e2.baslangic) / 60000)), beceriler: e2.beceriler, cocuk: gunlukSecim.cocuk, ben: gunlukSecim.ben,
-      not: $('#gunluk-not').value.trim().slice(0, 600), soru: $('#gunluk-soru').value.trim().slice(0, 400) };
+      not: $('#gunluk-not').value.trim().slice(0, 600), soru: $('#gunluk-soru').value.trim().slice(0, 400), kim: $('#gunluk-kim').value || e2.kim || '' };
     const liste = [kayit, ...gunlukOku()].slice(0, 100);
     try { localStorage.setItem(GUNLUK_ANAHTAR, JSON.stringify(liste)); } catch { /* yoksay */ }
     durum.ebeveyn = null;
@@ -4055,3 +4069,444 @@ try {
   if (EV_SURUMU) { if (!localStorage.getItem('hikaye-modu-mod')) { localStorage.setItem('hikaye-modu-mod', mod); pencereAc('e-nasil'); } }
   else if (!localStorage.getItem('hikaye-modu-mod')) modPenceresiAc();
 } catch { /* yoksay */ }
+
+// ================= Ortak: dosya paylaşma / indirme =================
+async function dosyaPaylas(dosya, baslik) {
+  try {
+    if (navigator.canShare?.({ files: [dosya] })) { await navigator.share({ files: [dosya], title: baslik }); return true; }
+  } catch (e) { if (e.name === 'AbortError') return false; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(dosya); a.download = dosya.name;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  bildir(`💾 ${dosya.name} indirildi`);
+  return true;
+}
+
+// ================= Sesli dinleme (ebeveyn ipuçları, nasıl oynanır) =================
+document.addEventListener('click', (e) => {
+  const d = e.target.closest('[data-dinle]');
+  if (!d) return;
+  const hedef = d.dataset.dinle ? $(d.dataset.dinle) : d.parentElement;
+  if (!window.speechSynthesis) return bildir('⚠️ Bu tarayıcı sesli okumayı desteklemiyor');
+  if (speechSynthesis.speaking) { speechSynthesis.cancel(); return; }
+  oku(hedef.innerText.replace(/🔊/g, '').trim(), true);
+});
+
+// ================= Sosyal beceri: "Sen olsan ne yapardın?" =================
+let sosyalAktif = null, sosyalDenemeler = [];
+
+function sosyalAc() {
+  sosyalAktif = null;
+  $('#sosyal-baslik').textContent = '🤝 Sen olsan ne yapardın?';
+  $('#sosyal-icerik').innerHTML = `<p class="ipucu">Bir durum seç. Hikayeyi birlikte okuyup ne yapılabileceğini düşünün.</p>
+    <div class="sosyal-liste">${SOSYAL.map((s) => `<button class="sosyal-kart" data-sosyal="${s.id}"><span>${s.ikon}</span><b>${kacis(s.ad)}</b>${durum.sosyal.some((x) => x.id === s.id) ? '<i>⭐</i>' : ''}</button>`).join('')}</div>`;
+  pencereAc('sosyal');
+}
+
+function sosyalGoster(id) {
+  const s = sosyalBul(id);
+  if (!s) return;
+  sosyalAktif = s; sosyalDenemeler = [];
+  // Seçenekler her seferinde karışık gelir; iyi yanıt hep aynı yerde durmasın.
+  const sira = s.secenekler.map((_, i) => i).sort(() => Math.random() - 0.5);
+  $('#sosyal-baslik').textContent = `${s.ikon} ${s.ad}`;
+  $('#sosyal-icerik').innerHTML = `<div class="sosyal-sahne">${s.sahne}</div>
+    <p class="sosyal-metin">${kacis(s.metin)} <button class="dinle-btn" data-sosyal-oku aria-label="Sesli dinle">🔊</button></p>
+    <h4 class="sosyal-soru">${kacis(s.soru)}</h4>
+    <div class="sosyal-secenekler">${sira.map((i, n) => `<button class="sosyal-secenek" data-secenek="${i}"><span>${'ABC'[n]}</span>${kacis(s.secenekler[i][0])}</button>`).join('')}</div>
+    <div id="sosyal-sonuc" class="sosyal-sonuc gizli"></div>
+    <div class="pencere-dugmeler"><button class="ince-btn" data-sosyal-geri>‹ Başka bir durum</button><span></span></div>`;
+  oku(`${s.metin} ${s.soru}`);
+}
+
+function sosyalSec(i) {
+  const s = sosyalAktif, [, sonuc, puan] = s.secenekler[i];
+  if (!sosyalDenemeler.includes(i)) sosyalDenemeler.push(i);
+  document.querySelectorAll('.sosyal-secenek').forEach((b) => { if (+b.dataset.secenek === i) b.classList.add(puan === 2 ? 'iyi' : 'denendi'); });
+  const el = $('#sosyal-sonuc');
+  el.className = 'sosyal-sonuc ' + (puan === 2 ? 'iyi' : 'dene');
+  el.innerHTML = `${puan === 2 ? '⭐ ' : '🤔 '}${kacis(sonuc)}${puan === 2 ? '<p class="ipucu">Sence şimdi herkes nasıl hissediyor? Sen de hiç böyle bir şey yaşadın mı?</p>' : ''}`;
+  oku(sonuc);
+  if (puan !== 2) { ses.sec(); return; }
+  ses.zil();
+  document.querySelectorAll('.sosyal-secenek').forEach((b) => { b.disabled = true; });
+  const ilk = s.secenekler[sosyalDenemeler[0]][0];
+  durum.sosyal.push({ id: s.id, t: Date.now(), ilk, ilkPuan: s.secenekler[sosyalDenemeler[0]][2], deneme: sosyalDenemeler.length });
+  akisEkle(`🤝 Ne yapardın · ${s.ad}: ilk seçim “${ilk}”${sosyalDenemeler.length > 1 ? ` · ${sosyalDenemeler.length}. denemede çözdü` : ''}`);
+}
+
+function sosyalRaporu() {
+  if (!durum.sosyal?.length) return '';
+  const etiket = ['zarar veren yol', 'işe yaramayan yol', 'durumu çözen yol'];
+  return `<h2>Sosyal beceri durumları</h2><table><tr><th>Durum</th><th>İlk seçimi</th><th>Çözene kadar</th></tr>${durum.sosyal.map((x) => {
+    const s = sosyalBul(x.id);
+    return `<tr><td>${s ? `${s.ikon} ${kacis(s.ad)}` : kacis(x.id)}</td><td>“${kacis(x.ilk || '')}” <i>(${etiket[x.ilkPuan] || ''})</i></td><td>${x.deneme} deneme</td></tr>`;
+  }).join('')}</table>`;
+}
+
+$('#btn-sosyal').addEventListener('click', () => { rehberKapat(); sosyalAc(); });
+$('#sosyal-penceresi').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget || e.target.closest('[data-kapat]')) return pencereKapat('sosyal');
+  const k = e.target.closest('[data-sosyal]');
+  if (k) return sosyalGoster(k.dataset.sosyal);
+  if (e.target.closest('[data-sosyal-geri]')) return sosyalAc();
+  if (e.target.closest('[data-sosyal-oku]') && sosyalAktif) return oku(`${sosyalAktif.metin} ${sosyalAktif.soru}`, true);
+  const b = e.target.closest('[data-secenek]');
+  if (b && !b.disabled) sosyalSec(+b.dataset.secenek);
+});
+
+// ================= Ebeveyn modu: kardeşler =================
+const COCUKLAR_ANAHTAR = 'hikaye-modu-cocuklar';
+const cocuklarOku = () => { try { return JSON.parse(localStorage.getItem(COCUKLAR_ANAHTAR) || '[]').filter(Boolean).slice(0, 6); } catch { return []; } };
+const cocuklarYaz = (l) => { try { localStorage.setItem(COCUKLAR_ANAHTAR, JSON.stringify(l)); } catch { /* yoksay */ } };
+
+function kimCiz() {
+  const c = cocuklarOku(), el = $('#e-kim');
+  el.classList.toggle('gizli', !c.length);
+  if (!c.length || !durum.ebeveyn) return;
+  if (!c.includes(durum.ebeveyn.kim)) durum.ebeveyn.kim = c[0];
+  el.innerHTML = `<span>🧒 Şimdi sıra: <b>${kacis(durum.ebeveyn.kim)}</b></span>${c.length > 1 ? '<button class="ince-btn" data-e="sira">🔄 Sıra değiştir</button>' : ''}`;
+}
+
+function siraDegistir() {
+  const c = cocuklarOku();
+  if (c.length < 2) return;
+  ebeveynBaslat();
+  durum.ebeveyn.kim = c[(c.indexOf(durum.ebeveyn.kim) + 1) % c.length];
+  if (sureHedef) sureAyarla(sureHedef);
+  kimCiz(); taslakKaydet();
+  ses.zil();
+  bildir(`🔄 Şimdi sıra: ${durum.ebeveyn.kim}. Hikayeyi o yönetiyor.`);
+}
+
+function gunlukKimCiz() {
+  const c = cocuklarOku();
+  $('#gunluk-kim-alan').classList.toggle('gizli', !c.length);
+  $('#gunluk-kim').innerHTML = c.map((k) => `<option ${k === durum.ebeveyn?.kim ? 'selected' : ''}>${kacis(k)}</option>`).join('') + '<option value="">Birlikte / belirtmeden</option>';
+}
+
+function cocuklarAc() {
+  const c = cocuklarOku();
+  $('#cocuk-listesi').innerHTML = c.length ? c.map((k, i) => `<span class="cocuk-etiket">🧒 ${kacis(k)}<button data-cocuk-sil="${i}" aria-label="Sil">✖</button></span>`).join('')
+    : '<p class="bos-mesaj">Henüz eklenmedi. Tek çocuğunuz varsa eklemeniz gerekmez.</p>';
+  pencereAc('cocuklar');
+}
+
+$('#btn-e-cocuklar').addEventListener('click', cocuklarAc);
+$('#cocuklar-penceresi').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget || e.target.closest('[data-kapat]')) return pencereKapat('cocuklar');
+  const s = e.target.closest('[data-cocuk-sil]');
+  if (s) { const c = cocuklarOku(); c.splice(+s.dataset.cocukSil, 1); cocuklarYaz(c); return cocuklarAc(); }
+  if (e.target.closest('[data-cocuk="ekle"]')) cocukEkle();
+});
+$('#cocuk-yeni').addEventListener('keydown', (e) => { if (e.key === 'Enter') cocukEkle(); });
+function cocukEkle() {
+  const ad = $('#cocuk-yeni').value.trim().slice(0, 16);
+  const c = cocuklarOku();
+  if (!ad || c.includes(ad)) return;
+  if (c.length >= 6) return bildir('En fazla 6 çocuk eklenebilir');
+  cocuklarYaz([...c, ad]);
+  $('#cocuk-yeni').value = '';
+  cocuklarAc();
+}
+
+// ================= Ebeveyn modu: takvim hatırlatıcısı (.ics) =================
+const GUNLER = [['MO', 'Pzt'], ['TU', 'Sal'], ['WE', 'Çar'], ['TH', 'Per'], ['FR', 'Cum'], ['SA', 'Cmt'], ['SU', 'Paz']];
+
+function hatirlatAc() {
+  $('#hatirlat-gunler').innerHTML = GUNLER.map(([k, a], i) => `<label><input type="checkbox" value="${k}" ${[0, 2, 4].includes(i) ? 'checked' : ''}><span>${a}</span></label>`).join('');
+  pencereAc('hatirlat');
+}
+
+// Takvim dosyasında satırlar 75 baytı geçmemeli; uzun satırlar bölünür.
+function icsSatir(satir) {
+  const kodlayici = new TextEncoder(), parcalar = [];
+  let parca = '', bayt = 0;
+  for (const ch of satir) {
+    const n = kodlayici.encode(ch).length;
+    if (bayt + n > (parcalar.length ? 73 : 74)) { parcalar.push(parca); parca = ''; bayt = 0; }
+    parca += ch; bayt += n;
+  }
+  parcalar.push(parca);
+  return parcalar.join('\r\n ');
+}
+
+function icsOlustur() {
+  const gunler = [...document.querySelectorAll('#hatirlat-gunler input:checked')].map((i) => i.value);
+  if (!gunler.length) return bildir('En az bir gün seçin');
+  const [sa, dk] = ($('#hatirlat-saat').value || '19:00').split(':').map(Number);
+  const sure = +$('#hatirlat-sure').value || 15;
+  const haftaGunu = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+  const bas = new Date(); bas.setHours(sa, dk, 0, 0);
+  if (bas < new Date()) bas.setDate(bas.getDate() + 1);
+  for (let i = 0; i < 7 && !gunler.includes(haftaGunu[bas.getDay()]); i++) bas.setDate(bas.getDate() + 1);
+  const bit = new Date(bas.getTime() + sure * 60000);
+  const p2 = (n) => String(n).padStart(2, '0');
+  const yerel = (d) => `${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}T${p2(d.getHours())}${p2(d.getMinutes())}00`;
+  const damga = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Hikaye Modu//Evde Oyun//TR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+    `UID:hikaye-${Date.now().toString(36)}@hikaye-modu`, `DTSTAMP:${damga}`, `DTSTART:${yerel(bas)}`, `DTEND:${yerel(bit)}`,
+    `RRULE:FREQ=WEEKLY;BYDAY=${gunler.join(',')}`, 'SUMMARY:🧸 Özel oyun zamanı',
+    `DESCRIPTION:${sure} dakika. Oyunu çocuğunuz yönetsin\\, siz eşlik edin. Telefon uzakta!`,
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Özel oyun zamanı yaklaşıyor', 'TRIGGER:-PT10M', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR']
+    .map(icsSatir).join('\r\n') + '\r\n';
+  dosyaPaylas(new File([ics], 'ozel-oyun-zamani.ics', { type: 'text/calendar' }), 'Özel oyun zamanı').then((ok) => {
+    if (ok) { pencereKapat('hatirlat'); bildir('📅 Dosyayı açıp takviminize ekleyin'); }
+  });
+}
+
+$('#btn-e-hatirlat').addEventListener('click', hatirlatAc);
+$('#hatirlat-penceresi').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget || e.target.closest('[data-kapat]')) return pencereKapat('hatirlat');
+  if (e.target.closest('[data-hatirlat="olustur"]')) icsOlustur();
+});
+
+// ================= Ev oyun günlüğünü danışmana gönderme =================
+const EV_KOD_ANAHTAR = 'hikaye-modu-ev-kod';
+// Danışman adresi kodla birlikte verebilir: .../hikaye-modu-ev/#kod=D-12 (adresin # sonrası hiçbir sunucuya gitmez).
+try {
+  const m = location.hash.match(/kod=([\w.-]{1,20})/);
+  if (m) { localStorage.setItem(EV_KOD_ANAHTAR, decodeURIComponent(m[1])); history.replaceState(null, '', location.pathname + location.search); }
+  $('#ev-kod').value = localStorage.getItem(EV_KOD_ANAHTAR) || '';
+} catch { /* yoksay */ }
+$('#ev-kod').addEventListener('input', (e) => { try { localStorage.setItem(EV_KOD_ANAHTAR, e.target.value.trim().slice(0, 20)); } catch { /* yoksay */ } });
+
+async function gunlukGonder() {
+  const liste = gunlukOku();
+  if (!liste.length) return bildir('Önce günlüğe bir oyun yazın');
+  const kod = $('#ev-kod').value.trim().slice(0, 20);
+  if (!kod) { $('#ev-kod').focus(); return bildir('Danışmanınızın verdiği kodu yazın'); }
+  const veri = { tur: 'hikaye-ev-gunlugu', surum: 1, kod, olusturma: new Date().toISOString(), gunluk: liste };
+  const ad = `ev-gunlugu-${kod.replace(/[^\w-]/g, '') || 'kod'}-${new Date().toISOString().slice(0, 10)}.json`;
+  if (await dosyaPaylas(new File([JSON.stringify(veri)], ad, { type: 'application/json' }), 'Oyun günlüğü')) {
+    bildir('📤 Dosyayı danışmanınıza gönderin (WhatsApp, e-posta…) ya da görüşmeye getirin');
+  }
+}
+$('#gunluk-penceresi').addEventListener('click', (e) => { if (e.target.closest('[data-gunluk="gonder"]')) gunlukGonder(); });
+
+// Danışman: gelen dosya kayıtlara (parola koruması varsa şifreli) eklenir.
+function evGunluguTemizle(liste) {
+  return (Array.isArray(liste) ? liste : []).slice(0, 200).map((g) => ({
+    t: +g.t || 0, sureDk: sinirla(Math.round(+g.sureDk || 0), 0, 240),
+    cocuk: sinirla(Math.round(+g.cocuk || 0), 0, 5) || null, ben: sinirla(Math.round(+g.ben || 0), 0, 5) || null,
+    kim: String(g.kim || '').slice(0, 16), not: String(g.not || '').slice(0, 600), soru: String(g.soru || '').slice(0, 400),
+    beceriler: Object.fromEntries(BECERILER.map((b) => [b.id, sinirla(Math.round(+g.beceriler?.[b.id] || 0), 0, 999)])),
+  })).filter((g) => g.t > 0);
+}
+
+$('#ev-gunluk-dosya').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  let v;
+  try {
+    if (f.size > 2e6) throw new Error('büyük');
+    v = JSON.parse(await f.text());
+    if (v.tur !== 'hikaye-ev-gunlugu') throw new Error('tür');
+  } catch { return bildir('⚠️ Bu dosya bir ev oyun günlüğü değil'); }
+  const gunluk = evGunluguTemizle(v.gunluk);
+  if (!gunluk.length) return bildir('⚠️ Dosyada oyun kaydı yok');
+  const kod = prompt(`${gunluk.length} ev oyunu bulundu. Hangi danışan koduna eklensin?`, String(v.kod || '').trim().slice(0, 20))?.trim().slice(0, 20);
+  if (!kod) return;
+  try {
+    const y = await kayitIstek('api/kayitlar', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tur: 'ev-gunlugu', kod, gunluk, gonderim: String(v.olusturma || '').slice(0, 30) }) });
+    if (!y.ok) throw new Error(y.status);
+    bildir(`🏠 ${gunluk.length} ev oyunu ${kod} koduna eklendi`);
+    kayitlariAc();
+  } catch { bildir('⚠️ Eklenemedi — sunucu açık mı?'); }
+});
+
+function evIzlemHTML(evler) {
+  const tum = new Map();
+  evler.forEach((v) => (v.gunluk || []).forEach((g) => tum.set(`${g.t}|${g.kim || ''}`, g)));
+  const liste = [...tum.values()].sort((a, b) => a.t - b.t);
+  if (!liste.length) return '';
+  const top = (id) => liste.reduce((s, g) => s + (g.beceriler?.[id] || 0), 0);
+  const ort = (k) => { const d = liste.map((g) => g[k]).filter(Boolean); return d.length ? d.reduce((a, b) => a + b, 0) / d.length : null; };
+  const keyif = (x) => (x ? `${KEYIFLER[Math.round(x) - 1]} (${x.toLocaleString('tr-TR', { maximumFractionDigits: 1 })}/5)` : '—');
+  const ilk = new Date(liste[0].t), son = new Date(liste[liste.length - 1].t);
+  const hafta = Math.max(1, Math.ceil((son - ilk) / (7 * 864e5)));
+  return `<h4>🏠 Evde özel oyun zamanı (ebeveynin günlüğü)</h4>
+    <p class="izlem-ozet"><b>${liste.length}</b> ev oyunu · ${ilk.toLocaleDateString('tr-TR')} – ${son.toLocaleDateString('tr-TR')} · haftada ortalama ${(liste.length / hafta).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} kez · ortalama ${Math.round(ort('sureDk') || 0)} dk</p>
+    <p>Çocuğun keyfi: ${keyif(ort('cocuk'))} · Ebeveynin keyfi: ${keyif(ort('ben'))}</p>
+    <p>Beceriler (toplam): ${BECERILER.map((b) => `${b.ikon} ${b.ad}: <b>${top(b.id)}</b>`).join(' · ')}</p>
+    <div class="tablo-kap"><table class="izlem-tablo"><tr><th>Tarih</th><th>Çocuk</th><th>Süre</th><th>Keyif (çocuk / ebeveyn)</th>${BECERILER.map((b) => `<th title="${kacis(b.ad)}">${b.ikon}</th>`).join('')}<th>Ebeveynin notu</th></tr>
+    ${liste.map((g) => `<tr><td>${new Date(g.t).toLocaleDateString('tr-TR')}</td><td>${kacis(g.kim || '—')}</td><td>${g.sureDk} dk</td><td>${KEYIFLER[g.cocuk - 1] || '—'} / ${KEYIFLER[g.ben - 1] || '—'}</td>${BECERILER.map((b) => `<td>${g.beceriler?.[b.id] || 0}</td>`).join('')}<td>${kacis([g.not, g.soru ? `❓ ${g.soru}` : ''].filter(Boolean).join(' · ')) || '—'}</td></tr>`).join('')}</table></div>
+    <p class="ipucu">Ebeveynin kendi tuttuğu kayıttır; beceri sayıları ebeveynin fark ettiklerini gösterir.</p>`;
+}
+
+function evGunluguGoster(veri) {
+  $('#kayit-penceresi').classList.add('gizli');
+  $('#evgunluk-baslik').textContent = `🏠 ${veri.kod || 'Kodsuz'} · ev oyun günlüğü`;
+  $('#evgunluk-icerik').innerHTML = evIzlemHTML([veri]);
+  pencereAc('evgunluk');
+}
+$('#evgunluk-penceresi').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget || e.target.closest('[data-kapat]')) return pencereKapat('evgunluk');
+  if (e.target.closest('[data-evgunluk="yazdir"]')) {
+    const rapor = $('#rapor');
+    rapor.className = '';
+    rapor.innerHTML = `<h1>🏠 Evde Özel Oyun Zamanı</h1><p class="alt-baslik">${kacis($('#evgunluk-baslik').textContent.replace('🏠 ', ''))}</p>${$('#evgunluk-icerik').innerHTML}
+      <p class="gizlilik">Bu belge gizli danışmanlık bilgisi içerir.</p>`;
+    window.print();
+  }
+});
+
+// ================= e-Rehberlik faaliyet metni =================
+function kullanilanCalismalar() {
+  const akis = durum.akis.map((a) => a.m).join(' ');
+  return [
+    [durum.icHava?.bas || durum.icHava?.son, 'iç hava durumu ile duygu değerlendirmesi'],
+    [durum.bedenler?.length, 'beden haritası'],
+    [durum.endiseler?.length, 'endişe kutusu'],
+    [durum.dilekler?.length, 'dilek sahnesi'],
+    [durum.kokler?.length, 'hikaye tamamlama'],
+    [durum.guvenliYer, 'güvenli yer çalışması'],
+    [durum.roller?.length, 'rol değiştirme'],
+    [durum.genogram, 'aile ağacı'],
+    [durum.sosyal?.length, 'sosyal beceri senaryoları'],
+    [durum.alanlar?.length, 'güvenli alan belirleme'],
+    [durum.baglar?.length, 'ilişki haritası'],
+    [durum.kumIzleri?.length, 'kum tepsisi'],
+    [/balon nefes|sakinleş/i.test(akis), 'nefes ve sakinleşme çalışması'],
+  ].filter(([v]) => v).map(([, ad]) => ad);
+}
+
+const listeYaz = (l) => (l.length < 2 ? l.join('') : `${l.slice(0, -1).join(', ')} ve ${l[l.length - 1]}`);
+
+function eRehberlikMetni(tur) {
+  const dk = Math.max(1, Math.round((Date.now() - durum.baslangic) / 60000));
+  const calismalar = kullanilanCalismalar();
+  const temalar = (durum.temalar || []).map((id) => temaBul(id)?.ad).filter(Boolean);
+  const ortamSayisi = new Set(durum.gezilen.length ? durum.gezilen : [durum.ortamId].filter(Boolean)).size;
+  const sn = sinifBul(durum.sinif);
+  const karSayisi = new Set(durum.sahnede.map((k) => k.kid)).size;
+  if (tur === 'sinif') {
+    const ad = sn ? sn.ad : 'Sınıf rehberliği';
+    return `“${ad}” konulu sınıf rehberlik etkinliği yaklaşık ${dk} dakika sürmüştür. Etkinlikte dijital hikaye ortamı (Hikaye Modu) akıllı tahtada kullanılmış; öğrencilerle birlikte ${sn ? `${sn.aciklama.toLocaleLowerCase('tr')} konularını` : 'belirlenen konuyu'} işleyen bir hikaye kurulmuştur.`
+      + `${durum.sorulanlar.length ? ` Hikaye boyunca öğrencilere ${durum.sorulanlar.length} yönlendirici soru yöneltilmiş, öğrencilerin düşüncelerini paylaşmaları sağlanmıştır.` : ' Hikaye üzerinden soru-cevap ile öğrencilerin düşüncelerini paylaşmaları sağlanmıştır.'}`
+      + `${durum.sosyal?.length ? ` Sosyal beceri senaryoları üzerinde birlikte çözüm yolları tartışılmıştır.` : ''} Etkinlik kısa bir pekiştirme çalışmasıyla tamamlanmıştır.`;
+  }
+  return `Öğrenciyle yaklaşık ${dk} dakikalık bireysel görüşme yapılmıştır. Görüşmede oyun temelli yaklaşım benimsenmiş; dijital hikaye ortamında (${ortamSayisi || 1} mekân${karSayisi ? `, ${karSayisi} karakter` : ''}) öğrencinin kendini oyun yoluyla ifade etmesi desteklenmiştir.`
+    + `${calismalar.length ? ` Görüşmede ${listeYaz(calismalar)} çalışmalarına yer verilmiştir.` : ''}`
+    + `${durum.duyguGecmisi.length ? ' Öğrencinin duygularını tanıma ve adlandırma becerileri üzerinde durulmuştur.' : ''}`
+    + `${temalar.length ? ` Görüşmede ${listeYaz(temalar.map((t) => t.toLocaleLowerCase('tr')))} temaları öne çıkmıştır.` : ''}`
+    + `${durum.hedef.trim() ? ` Görüşme hedefi: ${durum.hedef.trim().replace(/\.$/, '')}${durum.hedefDurumu ? ` (hedefe ${HEDEF_DURUMLARI[durum.hedefDurumu]})` : ''}.` : ''}`
+    + ' Görüşme olumlu bir kapanışla sonlandırılmış, gerekli görüldüğünde izlem görüşmesi yapılması planlanmıştır.';
+}
+
+function eRehberlikAc() {
+  rehberKapat();
+  $('#erehberlik-tur').value = durum.sinif ? 'sinif' : 'bireysel';
+  $('#erehberlik-metin').value = eRehberlikMetni($('#erehberlik-tur').value);
+  pencereAc('erehberlik');
+}
+$('#btn-erehberlik').addEventListener('click', eRehberlikAc);
+$('#erehberlik-tur').addEventListener('change', (e) => { $('#erehberlik-metin').value = eRehberlikMetni(e.target.value); });
+$('#erehberlik-penceresi').addEventListener('click', async (e) => {
+  if (e.target === e.currentTarget || e.target.closest('[data-kapat]')) return pencereKapat('erehberlik');
+  if (e.target.closest('[data-erehberlik="kopyala"]')) {
+    const m = $('#erehberlik-metin');
+    try { await navigator.clipboard.writeText(m.value); } catch { m.select(); document.execCommand('copy'); }
+    bildir('📋 Metin kopyalandı; e-Rehberlik’te açıklama alanına yapıştırın');
+  }
+  if (e.target.closest('[data-erehberlik="yenile"]')) $('#erehberlik-metin').value = eRehberlikMetni($('#erehberlik-tur').value);
+});
+
+// ================= Sınıf rehberliği =================
+function sinifAc() {
+  $('#sinif-listesi').innerHTML = SINIF_TEMALARI.map((t) => `<button class="senaryo-kart" data-sinif="${t.id}">
+    <span class="e">${t.ikon}</span><b>${kacis(t.ad)}</b><small>${kacis(t.aciklama)}</small>
+    <span class="kucuk-kar">${t.karakterler.map((id) => karakterBul(id)?.emoji || '').join(' ')}</span></button>`).join('');
+  pencereAc('sinif');
+}
+
+function sinifBaslat(t) {
+  ses.baslat();
+  durumYukle({ ...yeniDurum(), sinif: t.id, kod: `Sınıf · ${t.ad}`, ortamId: t.ortam, secili: t.karakterler.filter((id) => karakterBul(id)), isimGoster: true });
+  pencereKapat('sinif');
+  ses.zil();
+  akisEkle(`🏫 Sınıf etkinliği: ${t.ikon} ${t.ad}`);
+  soruKartlariCiz();
+  bildir(`🏫 ${t.ad}: karakterleri sınıfla birlikte seçin`);
+  aktifKategori = KATEGORILER[0].id;
+  ekranGoster('karakter');
+}
+
+$('#btn-sinif').addEventListener('click', () => { ses.baslat(); sinifAc(); });
+$('#sinif-penceresi').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget || e.target.closest('[data-kapat]')) return pencereKapat('sinif');
+  if (e.target.closest('[data-sinif-tam]')) {
+    const el = document.documentElement;
+    if (document.fullscreenElement) document.exitFullscreen?.(); else el.requestFullscreen?.().catch(() => bildir('Tam ekran açılamadı'));
+    return;
+  }
+  const t = sinifBul(e.target.closest('[data-sinif]')?.dataset.sinif);
+  if (t) sinifBaslat(t);
+});
+
+// ================= Erişilebilirlik / görünüm ayarları =================
+const ERISIM_ANAHTAR = 'hikaye-modu-erisim';
+const ERISIM = [
+  ['buyuk', '🔠 Büyük yazı ve düğmeler', 'Az gören çocuklar ya da uzaktan bakan sınıf için'],
+  ['okuma', '📖 Okuması kolay yazı', 'Geniş harf ve satır aralığı; okumada zorlanan çocuklar için'],
+  ['renk', '🎨 Renk körlüğüne uygun duygu renkleri', 'Duygu renkleri birbirinden daha kolay ayrılır'],
+  ['karsitlik', '◐ Yüksek karşıtlık', 'Soluk yazılar koyulaşır, kenarlar belirginleşir'],
+  ['hareket', '🐢 Hareketleri azalt', 'Kayma, yanıp sönme ve geçiş efektleri kapanır'],
+];
+const RENK_ORIJINAL = Object.fromEntries(DUYGULAR.map((d) => [d.id, d.renk]));
+// Okabe–Ito paleti temel alındı; emoji her zaman rengin yanında durur.
+const RENK_DOSTU = { mutlu: '#F0E442', uzgun: '#0072B2', kizgin: '#D55E00', korkmus: '#4D4D4D', saskin: '#E69F00', sakin: '#009E73',
+  endiseli: '#CC79A7', utangac: '#F4B6D2', heyecanli: '#882255', yorgun: '#A6A6A6', sevgi: '#AA3377', yalniz: '#56B4E9' };
+let erisim = {};
+try { erisim = JSON.parse(localStorage.getItem(ERISIM_ANAHTAR) || '{}') || {}; } catch { erisim = {}; }
+
+function erisimUygula() {
+  ERISIM.forEach(([k]) => document.documentElement.classList.toggle('er-' + k, !!erisim[k]));
+  DUYGULAR.forEach((d) => { d.renk = erisim.renk ? (RENK_DOSTU[d.id] || RENK_ORIJINAL[d.id]) : RENK_ORIJINAL[d.id]; });
+}
+
+function erisimAc() {
+  $('#erisim-listesi').innerHTML = ERISIM.map(([k, ad, ack]) => `<label class="erisim-secenek"><input type="checkbox" data-erisim="${k}" ${erisim[k] ? 'checked' : ''}><span><b>${ad}</b><small>${ack}</small></span></label>`).join('')
+    + `<div class="renk-ornek">${DUYGULAR.map((d) => `<span style="background:${d.renk}" title="${kacis(d.ad)}">${d.emoji}</span>`).join('')}</div>`;
+  pencereAc('erisim');
+}
+
+$('#btn-erisim').addEventListener('click', erisimAc);
+$('#erisim-penceresi').addEventListener('click', (e) => { if (e.target === e.currentTarget || e.target.closest('[data-kapat]')) pencereKapat('erisim'); });
+$('#erisim-penceresi').addEventListener('change', (e) => {
+  const k = e.target.dataset.erisim;
+  if (!k) return;
+  erisim[k] = e.target.checked;
+  try { localStorage.setItem(ERISIM_ANAHTAR, JSON.stringify(erisim)); } catch { /* yoksay */ }
+  erisimUygula();
+  if (k === 'renk') {
+    erisimAc();
+    // Duygu paneli yalnızca bir karakter seçiliyken çizilebilir.
+    try { duyguPaneliCiz(); } catch { /* seçili karakter yok */ }
+  }
+});
+erisimUygula();
+
+// ================= Parolasız kayıt uyarısı (danışma modu) =================
+async function korumaUyariDenetle() {
+  const el = $('#koruma-uyari');
+  if (EV_SURUMU || mod !== 'danisma') return el.classList.add('gizli');
+  try {
+    if (localStorage.getItem('hikaye-modu-koruma-sonra') === new Date().toDateString()) return el.classList.add('gizli');
+    const b = await fetch('api/koruma').then((y) => y.json());
+    el.classList.toggle('gizli', !!b.aktif);
+  } catch { el.classList.add('gizli'); }
+}
+$('#koruma-uyari').addEventListener('click', (e) => {
+  if (e.target.closest('[data-koruma-uyari="ac"]')) korumaAc();
+  if (e.target.closest('[data-koruma-uyari="sonra"]')) {
+    try { localStorage.setItem('hikaye-modu-koruma-sonra', new Date().toDateString()); } catch { /* yoksay */ }
+    $('#koruma-uyari').classList.add('gizli');
+  }
+});
+$('#koruma-penceresi').addEventListener('click', () => setTimeout(korumaUyariDenetle, 1200));
+$('#mod-penceresi').addEventListener('click', () => setTimeout(korumaUyariDenetle, 300));
+korumaUyariDenetle();

@@ -1,9 +1,9 @@
 // Uygulama olarak kurulabilmesi için basit bir servis çalışanı. Önce ağdan alınır (program güncellenince hemen
 // yenisi gelir); ağ yoksa son kopya gösterilir. Kayıtlar ve diğer /api/ istekleri asla önbelleğe alınmaz.
-const ONBELLEK = 'hikaye-ev-20261127100955';
+const ONBELLEK = 'hikaye-ev-20261127125309';
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(ONBELLEK).then((c) => c.addAll(["./", "./index.html", "./stil.css", "./manifest.webmanifest", "./js/ceviri.js", "./js/cizimler.js", "./js/hava.js", "./js/karakterler.js", "./js/kokler.js", "./js/ortamlar.js", "./js/senaryolar.js", "./js/ses.js", "./js/uygulama.js", "./ikonlar/ikon-192.png", "./ikonlar/ikon-512.png", "./ikonlar/ikon-maskeli-512.png"].map((u) => new Request(u, { cache: 'reload' })))).catch(() => {}));
+  e.waitUntil(caches.open(ONBELLEK).then((c) => c.addAll(["./", "./index.html", "./stil.css", "./manifest.webmanifest", "./js/beceriler.js", "./js/ceviri.js", "./js/cizimler.js", "./js/hava.js", "./js/karakterler.js", "./js/kokler.js", "./js/ortamlar.js", "./js/senaryolar.js", "./js/ses.js", "./js/uygulama.js", "./ikonlar/ikon-192.png", "./ikonlar/ikon-512.png", "./ikonlar/ikon-maskeli-512.png"].map((u) => new Request(u, { cache: 'reload' })))).catch(() => {}));
   self.skipWaiting();
 });
 
